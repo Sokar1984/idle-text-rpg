@@ -1,9 +1,9 @@
 import {
   addXp,
-  canCarry,
-  inventoryCapacity,
-  inventoryUsed
+  canCarry
 } from './character.js';
+
+const MAX_BOARD_EVENTS = 5;
 
 function pick(array) {
   if (!array || array.length === 0) return null;
@@ -139,7 +139,6 @@ function resolveEvent(char, event, data) {
     xpGain = Math.round(2 + char.level * 0.5);
   }
 
-  // No free wilderness healing — rest at home instead
   return { text, xpGain, type };
 }
 
@@ -151,6 +150,49 @@ function maybeChangeWildernessLocation(char, data) {
     char.locationId = next.id;
     pushLog(char, 'travel', `You reach ${next.name}. ${next.description}`);
   }
+}
+
+function expireBoardEvents(char) {
+  if (!char.activeEvents?.length) return;
+  const nowH = char.gameHours || 0;
+  const before = char.activeEvents.length;
+  char.activeEvents = char.activeEvents.filter(e => e.expiresAtHour > nowH);
+  const lost = before - char.activeEvents.length;
+  if (lost > 0) {
+    pushLog(char, 'system', `${lost} event${lost === 1 ? '' : 's'} expired.`);
+  }
+}
+
+function maybeSpawnBoardEvent(char, data) {
+  if (!data.boardEvents?.length) return;
+  if (!char.activeEvents) char.activeEvents = [];
+  if (char.activeEvents.length >= MAX_BOARD_EVENTS) return;
+  // ~12% chance per tick to offer something new
+  if (Math.random() > 0.12) return;
+
+  const activeIds = new Set(char.activeEvents.map(e => e.templateId));
+  const candidates = data.boardEvents.filter(
+    e => matchesLevel(e, char.level) && !activeIds.has(e.id)
+  );
+  const template = pick(candidates);
+  if (!template) return;
+
+  const duration = template.duration_hours || 16;
+  const instance = {
+    instanceId: `${template.id}_${Math.floor(char.gameHours)}_${Math.random().toString(36).slice(2, 7)}`,
+    templateId: template.id,
+    name: template.name,
+    description: template.description,
+    zone: template.zone || 'wilderness',
+    locationHint: template.location_hint || null,
+    xpReward: template.xp_reward || 20,
+    risk: template.risk || 'medium',
+    tags: template.tags || [],
+    offeredAtHour: char.gameHours || 0,
+    expiresAtHour: (char.gameHours || 0) + duration
+  };
+  char.activeEvents.push(instance);
+  pushLog(char, 'system', `New event available: ${instance.name}.`);
 }
 
 function wildernessTick(char, data) {
@@ -175,7 +217,6 @@ function wildernessTick(char, data) {
 }
 
 function homeTick(char, data) {
-  // Slow passive recovery only in bedroom
   if (char.sublocation === 'bedroom' && char.hp < char.maxHp) {
     const heal = Math.max(1, Math.round(char.maxHp * 0.08));
     char.hp = Math.min(char.maxHp, char.hp + heal);
@@ -194,6 +235,8 @@ export function advanceTime(char, data, ticks = 1) {
   for (let i = 0; i < ticks; i++) {
     char.totalTicks += 1;
     advanceGameHours(char, hoursPerTick);
+    expireBoardEvents(char);
+    maybeSpawnBoardEvent(char, data);
 
     let xp = 0;
     if (char.zone === 'wilderness') xp = wildernessTick(char, data);
@@ -201,6 +244,58 @@ export function advanceTime(char, data, ticks = 1) {
     else if (char.zone === 'village') xp = villageTick(char, data);
 
     if (xp > 0) addXp(char, xp, data.config);
+  }
+
+  char.lastTick = Date.now();
+  return char;
+}
+
+/** Click an active board event: travel, complete, bonus XP, resume idle zone. */
+export function completeBoardEvent(char, data, instanceId) {
+  const idx = (char.activeEvents || []).findIndex(e => e.instanceId === instanceId);
+  if (idx < 0) {
+    pushLog(char, 'system', 'That event is no longer available.');
+    return char;
+  }
+
+  const evt = char.activeEvents[idx];
+  if ((char.gameHours || 0) >= evt.expiresAtHour) {
+    char.activeEvents.splice(idx, 1);
+    pushLog(char, 'system', `${evt.name} has already expired.`);
+    return char;
+  }
+
+  // Travel to relevant zone / location
+  const zone = evt.zone || 'wilderness';
+  const hours = data.config.travel_hours?.[zone] ?? 2;
+  advanceGameHours(char, hours);
+  char.zone = zone;
+  char.sublocation = zone === 'village' ? 'vendor' : zone === 'home' ? 'bedroom' : null;
+  if (evt.locationHint) char.locationId = evt.locationHint;
+
+  // Resolve a light challenge based on risk
+  let bonus = evt.xpReward || 20;
+  let note = `You handle: ${evt.name}.`;
+  if (evt.risk === 'high' && Math.random() < 0.35) {
+    const dmg = 3 + Math.floor(char.level / 2);
+    char.hp = Math.max(1, char.hp - dmg);
+    note += ` It costs you (−${dmg} HP).`;
+    bonus = Math.round(bonus * 0.75);
+  } else if (evt.risk === 'low') {
+    bonus = Math.round(bonus * 1.05);
+  }
+
+  char.activeEvents.splice(idx, 1);
+  addXp(char, bonus, data.config);
+  pushLog(char, 'discovery', `${note} (+${bonus} XP).`);
+
+  // Auto-resume idle in wilderness after event
+  if (char.zone !== 'wilderness') {
+    const back = data.config.travel_hours?.wilderness ?? 3;
+    advanceGameHours(char, back);
+    char.zone = 'wilderness';
+    char.sublocation = null;
+    pushLog(char, 'travel', 'You return to the wilderness and resume your road.');
   }
 
   char.lastTick = Date.now();
@@ -230,6 +325,7 @@ export function travelTo(char, data, zone, sublocation = null) {
   if (zone === 'home' && sublocation === 'storage') detail = 'your storage';
 
   pushLog(char, 'travel', `You travel to ${detail} (${hours} hours on the road).`);
+  expireBoardEvents(char);
   char.lastTick = Date.now();
   return char;
 }
@@ -242,6 +338,7 @@ export function restAtHome(char, data) {
   char.sublocation = 'bedroom';
   const hours = data.config.rest_hours ?? 8;
   advanceGameHours(char, hours);
+  expireBoardEvents(char);
   const pct = data.config.rest_heal_percent ?? 0.35;
   const heal = Math.max(3, Math.round(char.maxHp * pct));
   const before = char.hp;
@@ -275,7 +372,6 @@ export function sellAllAtVendor(char, data) {
   char.inventory = [];
   char.copper = (char.copper || 0) + total;
 
-  // Charisma slightly improves payout
   const bonus = Math.floor(total * Math.min(0.15, (char.stats.charisma || 0) * 0.01));
   if (bonus > 0) {
     char.copper += bonus;
@@ -310,7 +406,6 @@ export function moveToStorage(char, data) {
 const MAX_OFFLINE_TICKS = 1440;
 
 export function catchUp(char, data) {
-  // Only wilderness auto-progresses meaningfully while away
   if (char.zone !== 'wilderness') {
     char.lastTick = Date.now();
     return { character: char, ticks: 0 };
