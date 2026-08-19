@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Monster / Encounter Template",
+  "type": "object",
+  "required": ["id", "name", "level_range", "tags", "description", "stats"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier, e.g. mon_wolf_02"
+    },
+    "name": {
+      "type": "string"
+    },
+    "level_range": {
+      "type": "array",
+      "items": { "type": "integer" },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "e.g. beast, undead, humanoid, pack, flying"
+    },
+    "description": {
+      "type": "string"
+    },
+    "stats": {
+      "type": "object",
+      "required": ["hp", "attack", "defense", "speed"],
+      "properties": {
+        "hp": { "type": "integer" },
+        "attack": { "type": "integer" },
+        "defense": { "type": "integer" },
+        "speed": { "type": "integer" }
+      }
+    },
+    "traits": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "loot_table": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
