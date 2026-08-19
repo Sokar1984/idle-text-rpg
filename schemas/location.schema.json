@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Location Template",
+  "type": "object",
+  "required": ["id", "name", "level_range", "tags", "description"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier, e.g. loc_forest_03"
+    },
+    "name": {
+      "type": "string"
+    },
+    "level_range": {
+      "type": "array",
+      "items": { "type": "integer" },
+      "minItems": 2,
+      "maxItems": 2,
+      "description": "[min_level, max_level]"
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "e.g. forest, wilderness, urban, magical, dangerous"
+    },
+    "description": {
+      "type": "string",
+      "description": "Short atmospheric description shown to the player"
+    },
+    "possible_events": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Event types that can occur here"
+    },
+    "danger": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10
+    },
+    "resources": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
