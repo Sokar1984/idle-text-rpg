@@ -1,0 +1,41 @@
+{
+  "skills": [
+    {
+      "id": "unarmed",
+      "name": "Unarmed Combat",
+      "description": "Fists, grapples, and improvised force when no weapon is ready.",
+      "primary_stats": ["strength", "agility"]
+    },
+    {
+      "id": "armed",
+      "name": "Armed Combat",
+      "description": "Class weapon discipline. Renamed per class in the UI.",
+      "primary_stats": ["strength", "agility", "intelligence"],
+      "class_names": {
+        "warrior": "Weapon Mastery",
+        "ranger": "Marksman Craft",
+        "mage": "Staff & Focus",
+        "rogue": "Blade Work"
+      }
+    },
+    {
+      "id": "survival",
+      "name": "Fieldcraft",
+      "description": "Endurance on the road. Stretches how long you can press on before you must recover.",
+      "primary_stats": ["vitality", "intelligence"]
+    },
+    {
+      "id": "crafting",
+      "name": "Toolwright",
+      "description": "Repair gear, fashion tools, and work raw materials into something useful.",
+      "primary_stats": ["intelligence", "agility"]
+    },
+    {
+      "id": "apothecary",
+      "name": "Apothecary",
+      "description": "Bandages, tonics, poisons, and whatever else can be mixed from plant and mineral.",
+      "primary_stats": ["intelligence", "charisma"]
+    }
+  ],
+  "notes": "Skills range 0–100. One training point per level. Percent gained per point depends on relevant stats so a single path cannot trivially max every skill."
+}
