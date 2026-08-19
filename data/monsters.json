@@ -1,0 +1,114 @@
+{
+  "monsters": [
+    {
+      "id": "mon_rat_01",
+      "name": "Giant Rat",
+      "level_range": [1, 2],
+      "tags": ["beast", "vermin"],
+      "description": "An oversized rat with matted fur and yellow teeth.",
+      "stats": { "hp": 8, "attack": 3, "defense": 1, "speed": 6 },
+      "traits": [],
+      "loot_table": ["rat_tail", "scraps"]
+    },
+    {
+      "id": "mon_wolf_01",
+      "name": "Lean Timber Wolf",
+      "level_range": [1, 3],
+      "tags": ["beast", "pack", "forest"],
+      "description": "A thin but aggressive wolf with a matted grey coat.",
+      "stats": { "hp": 16, "attack": 6, "defense": 3, "speed": 8 },
+      "traits": ["pack_tactics"],
+      "loot_table": ["wolf_pelt", "wolf_fang"]
+    },
+    {
+      "id": "mon_boar_01",
+      "name": "Forest Boar",
+      "level_range": [2, 4],
+      "tags": ["beast", "forest"],
+      "description": "A heavy-shouldered boar with sharp tusks and an irritable temper.",
+      "stats": { "hp": 28, "attack": 8, "defense": 5, "speed": 5 },
+      "traits": ["charge"],
+      "loot_table": ["boar_tusk", "tough_meat"]
+    },
+    {
+      "id": "mon_bandit_01",
+      "name": "Roadside Bandit",
+      "level_range": [2, 5],
+      "tags": ["humanoid", "bandit"],
+      "description": "A rough-looking man with a short blade and desperate eyes.",
+      "stats": { "hp": 22, "attack": 7, "defense": 4, "speed": 6 },
+      "traits": [],
+      "loot_table": ["coins", "crude_dagger", "scraps"]
+    },
+    {
+      "id": "mon_spider_01",
+      "name": "Webspinner Spider",
+      "level_range": [3, 6],
+      "tags": ["beast", "vermin", "forest"],
+      "description": "A large spider that drops silently from the branches above.",
+      "stats": { "hp": 18, "attack": 9, "defense": 2, "speed": 9 },
+      "traits": ["poison"],
+      "loot_table": ["spider_silk", "venom_sac"]
+    },
+    {
+      "id": "mon_skeleton_01",
+      "name": "Restless Skeleton",
+      "level_range": [4, 7],
+      "tags": ["undead", "ruins"],
+      "description": "Bones held together by faded magic. Empty sockets still somehow watch you.",
+      "stats": { "hp": 26, "attack": 9, "defense": 6, "speed": 4 },
+      "traits": ["undead"],
+      "loot_table": ["bone_shard", "tattered_cloth"]
+    },
+    {
+      "id": "mon_wolf_alpha_01",
+      "name": "Alpha Timber Wolf",
+      "level_range": [5, 8],
+      "tags": ["beast", "pack", "forest", "dangerous"],
+      "description": "A larger, scarred wolf that leads the pack. Its growls are deeper and more confident.",
+      "stats": { "hp": 42, "attack": 12, "defense": 6, "speed": 9 },
+      "traits": ["pack_tactics", "leader"],
+      "loot_table": ["alpha_pelt", "wolf_fang", "rare_fang"]
+    },
+    {
+      "id": "mon_bandit_veteran_01",
+      "name": "Veteran Bandit",
+      "level_range": [6, 9],
+      "tags": ["humanoid", "bandit", "dangerous"],
+      "description": "A hardened outlaw with better gear and the scars to prove experience.",
+      "stats": { "hp": 45, "attack": 13, "defense": 8, "speed": 7 },
+      "traits": ["tactics"],
+      "loot_table": ["coins", "iron_sword", "leather_armor"]
+    },
+    {
+      "id": "mon_wraith_01",
+      "name": "Pale Wraith",
+      "level_range": [7, 10],
+      "tags": ["undead", "magical", "dangerous"],
+      "description": "A translucent figure that drifts rather than walks. The air grows cold near it.",
+      "stats": { "hp": 38, "attack": 15, "defense": 4, "speed": 10 },
+      "traits": ["ethereal", "chill"],
+      "loot_table": ["ectoplasm", "faded_essence"]
+    },
+    {
+      "id": "mon_forest_guardian_01",
+      "name": "Twisted Forest Guardian",
+      "level_range": [8, 10],
+      "tags": ["magical", "forest", "dangerous", "elite"],
+      "description": "A once-protective spirit of the woods, now warped and hostile. Bark-like skin and glowing eyes.",
+      "stats": { "hp": 70, "attack": 16, "defense": 12, "speed": 5 },
+      "traits": ["regeneration", "rooted"],
+      "loot_table": ["living_wood", "guardian_core", "rare_herbs"]
+    },
+    {
+      "id": "mon_cultist_01",
+      "name": "Hooded Cultist",
+      "level_range": [7, 10],
+      "tags": ["humanoid", "magical", "dangerous"],
+      "description": "A figure in dark robes murmuring under their breath. Power gathers around their hands.",
+      "stats": { "hp": 34, "attack": 14, "defense": 5, "speed": 6 },
+      "traits": ["caster"],
+      "loot_table": ["dark_tome_page", "ritual_candle", "coins"]
+    }
+  ]
+}
