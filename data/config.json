@@ -1,0 +1,21 @@
+{
+  "version": "0.1.0",
+  "tick_interval_seconds": 60,
+  "offline_progress": true,
+  "target_hours_to_level_10": 24,
+  "xp_table": {
+    "2": 40,
+    "3": 120,
+    "4": 280,
+    "5": 550,
+    "6": 950,
+    "7": 1500,
+    "8": 2300,
+    "9": 3400,
+    "10": 5000
+  },
+  "base_xp_per_tick": 1.2,
+  "combat_xp_multiplier": 3.5,
+  "discovery_xp_multiplier": 2.0,
+  "notes": "XP values are cumulative totals required to reach that level. Tuned so a reasonably active idle character can reach level 10 in roughly 24 real hours."
+}
