@@ -1,0 +1,39 @@
+{
+  "items": {
+    "rat_tail": { "name": "Rat tail", "value": 2 },
+    "scraps": { "name": "Scraps", "value": 3 },
+    "wolf_pelt": { "name": "Wolf pelt", "value": 18 },
+    "wolf_fang": { "name": "Wolf fang", "value": 12 },
+    "boar_tusk": { "name": "Boar tusk", "value": 22 },
+    "tough_meat": { "name": "Tough meat", "value": 8 },
+    "coins": { "name": "Loose coins", "value": 15 },
+    "crude_dagger": { "name": "Crude dagger", "value": 35 },
+    "spider_silk": { "name": "Spider silk", "value": 28 },
+    "venom_sac": { "name": "Venom sac", "value": 40 },
+    "bone_shard": { "name": "Bone shard", "value": 10 },
+    "tattered_cloth": { "name": "Tattered cloth", "value": 5 },
+    "alpha_pelt": { "name": "Alpha pelt", "value": 55 },
+    "rare_fang": { "name": "Rare fang", "value": 70 },
+    "iron_sword": { "name": "Iron sword", "value": 120 },
+    "leather_armor": { "name": "Leather armor", "value": 95 },
+    "ectoplasm": { "name": "Ectoplasm", "value": 65 },
+    "faded_essence": { "name": "Faded essence", "value": 80 },
+    "living_wood": { "name": "Living wood", "value": 90 },
+    "guardian_core": { "name": "Guardian core", "value": 200 },
+    "rare_herbs": { "name": "Rare herbs", "value": 45 },
+    "dark_tome_page": { "name": "Dark tome page", "value": 75 },
+    "ritual_candle": { "name": "Ritual candle", "value": 20 },
+    "herbs": { "name": "Herbs", "value": 6 },
+    "wood": { "name": "Wood", "value": 4 },
+    "game": { "name": "Game meat", "value": 10 },
+    "scrap": { "name": "Scrap", "value": 5 },
+    "fish": { "name": "Fish", "value": 7 },
+    "water": { "name": "Water skin", "value": 3 },
+    "stone": { "name": "Stone", "value": 2 },
+    "worn_cloth": { "name": "Worn cloth", "value": 4 }
+  },
+  "currency": {
+    "copper_per_silver": 100,
+    "silver_per_gold": 100
+  }
+}
