@@ -1,9 +1,61 @@
 import { loadData } from './data.js';
 import { createCharacter, getCharacter, saveCharacter, resetCharacter } from './character.js';
-import { advanceTime, catchUp } from './engine.js';
+import {
+  advanceTime,
+  catchUp,
+  travelTo,
+  restAtHome,
+  sellAllAtVendor,
+  moveToStorage
+} from './engine.js';
 import { renderCreation, renderGame } from './ui.js';
 
 let data = null;
+
+function handlers() {
+  return {
+    onTravel: (zone) => {
+      const char = getCharacter();
+      if (!char) return;
+      const sub = zone === 'home' ? 'bedroom' : zone === 'village' ? 'vendor' : null;
+      const updated = travelTo(char, data, zone, sub);
+      saveCharacter(updated);
+      redraw(updated);
+    },
+    onSublocation: (zone, sub) => {
+      const char = getCharacter();
+      if (!char) return;
+      const updated = travelTo(char, data, zone, sub);
+      saveCharacter(updated);
+      redraw(updated);
+    },
+    onRest: () => {
+      const char = getCharacter();
+      if (!char) return;
+      const updated = restAtHome(char, data);
+      saveCharacter(updated);
+      redraw(updated);
+    },
+    onSell: () => {
+      const char = getCharacter();
+      if (!char) return;
+      const updated = sellAllAtVendor(char, data);
+      saveCharacter(updated);
+      redraw(updated);
+    },
+    onStore: () => {
+      const char = getCharacter();
+      if (!char) return;
+      const updated = moveToStorage(char, data);
+      saveCharacter(updated);
+      redraw(updated);
+    }
+  };
+}
+
+function redraw(char) {
+  renderGame(char, data, handlers());
+}
 
 async function init() {
   data = await loadData();
@@ -15,7 +67,7 @@ async function init() {
     const { character } = catchUp(char, data);
     saveCharacter(character);
     showGame();
-    renderGame(character, data);
+    redraw(character);
   } else {
     showCreation();
     renderCreation(data, onCreate);
@@ -42,10 +94,10 @@ function showGame() {
 
 function onCreate(opts) {
   const char = createCharacter(opts, data.classes, data.races);
-  advanceTime(char, data, 3);
+  // Start at home; first venture is the player's choice
   saveCharacter(char);
   showGame();
-  renderGame(char, data);
+  redraw(char);
 }
 
 function applyDueTicks() {
@@ -53,11 +105,11 @@ function applyDueTicks() {
   if (!char) return;
   const { character, ticks } = catchUp(char, data);
   if (ticks <= 0) {
-    renderGame(char, data);
+    redraw(char);
     return;
   }
   saveCharacter(character);
-  renderGame(character, data);
+  redraw(character);
 }
 
 function onTick() {
@@ -65,7 +117,7 @@ function onTick() {
   if (!char) return;
   const updated = advanceTime(char, data, 5);
   saveCharacter(updated);
-  renderGame(updated, data);
+  redraw(updated);
 }
 
 function onReset() {
