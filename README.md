@@ -1,38 +1,49 @@
 # Idle Text RPG
 
-A text-based idle RPG proof-of-concept.
+A text-based idle RPG. You create a character. The character lives on its own. You check in, read the log, spend skill points, and leave again.
 
-## Concept
+Open `index.html` in a browser (or serve the folder). Progress is stored in `localStorage`.
 
-The player creates a character that receives RPG attributes and then begins auto-playing. The character progresses in real time even when the player is away. When the player returns, they can:
+## Playable loop
 
-- Read the log of what happened
-- Adjust equipment
-- Assign skill points
-- Make occasional decisions
-- Let the character continue
+1. Create a character (name + class).
+2. The first stretch of road is generated immediately.
+3. Time continues in real time (~1 beat per minute) even while you are away.
+4. Returning catches up offline progress (capped at 24 hours).
+5. **Walk on** advances a few beats now. Skill points and pack loot wait for you.
 
-The world and events are designed to be endlessly generated through templates (locations, monsters, events) that can be expanded by AI.
+## Content
 
-## Goals of this repository
+World content is JSON templates, not hard-coded story:
 
-- Serve as a clean, AI-friendly foundation
-- Make it easy for any AI (or human) to understand the vision and continue development
-- Keep the first version deliberately simple and text-based with a clean interface
+| File | Purpose |
+|------|--------|
+| `data/config.json` | Tick rate, XP curve (~24h to level 10) |
+| `data/classes.json` | Classes and starting stats |
+| `data/locations.json` | Places |
+| `data/monsters.json` | Encounters |
+| `data/events.json` | What can happen |
+| `schemas/` | Shape of those templates |
 
-## Status
+Add more world by dropping templates that match the schemas.
 
-Early proof-of-concept stage. Core architecture and content templates are being established.
+## Engine
 
-## For AIs reading this repository
+| File | Role |
+|------|------|
+| `js/character.js` | Create / save / XP / skills |
+| `js/engine.js` | Idle ticks, combat, events, travel, offline catch-up |
+| `js/ui.js` | Creation screen and journal |
+| `js/main.js` | Boot, live ticker, reset |
 
-Start with these files in order:
+## For AIs
 
-1. `CONCEPT.md` – Full game vision and design principles
-2. `AI_INSTRUCTIONS.md` – How to work on this project
-3. `schemas/` – Data structures for locations, monsters, and events
+1. `CONCEPT.md` — vision
+2. `AI_INSTRUCTIONS.md` — how to work here
+3. `schemas/` — data contracts
+4. Then `data/` and `js/`
 
-Then explore the rest of the codebase.
+Keep content in JSON. Keep the caretaker loop: auto-progress → log → player adjustment → continue.
 
 ## Repository
 

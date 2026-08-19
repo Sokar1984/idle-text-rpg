@@ -47,10 +47,15 @@ When asked to expand the world:
 
 ## Current stage
 
-Early foundation. The most valuable contributions right now are:
+Playable proof-of-concept. Character creation, idle ticks (including offline catch-up), a readable log, skill points, and a pack are in place. Content covers levels 1–10.
 
-- Solidifying the data schemas
-- Generating high-quality initial template batches
-- Building a minimal but playable loop (character creation → auto progress → readable log → basic upgrades)
+Most valuable contributions now:
+
+- More location / monster / event templates
+- Equipment you can actually wear (inventory is collected, not equipped)
+- Occasional pending choices for the player
+- Tuning combat and the 24-hour-to-10 XP curve
+
+Keep the loop: auto-progress → log → player adjustment → continue.
 
 Future AIs should treat this repository as a living project that is intentionally easy to continue.

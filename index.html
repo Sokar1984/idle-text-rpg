@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Idle Text RPG</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -14,38 +17,41 @@
     </header>
 
     <main>
-      <!-- Character Creation -->
       <section id="creation" class="panel">
-        <h2>Create Your Character</h2>
+        <h2>Create your character</h2>
+        <p class="lede">They will live on their own. You check in, read the log, and decide what to become.</p>
         <div class="form-group">
           <label for="char-name">Name</label>
-          <input type="text" id="char-name" placeholder="Enter a name" maxlength="24" />
+          <input type="text" id="char-name" placeholder="Wanderer" maxlength="24" />
         </div>
         <div class="form-group">
           <label>Class</label>
           <div id="class-options" class="class-grid"></div>
         </div>
-        <button id="btn-create" class="primary">Begin Journey</button>
+        <button id="btn-create" class="primary">Begin journey</button>
       </section>
 
-      <!-- Main Game View -->
-      <section id="game" class="panel hidden">
-        <div class="top-bar">
-          <div id="char-summary"></div>
-          <div class="actions">
-            <button id="btn-tick" class="secondary">Advance Time</button>
-            <button id="btn-reset" class="danger">Reset</button>
+      <section id="game" class="hidden">
+        <div class="panel top-card">
+          <div class="top-bar">
+            <div id="char-summary"></div>
+            <div class="actions">
+              <button id="btn-tick" class="secondary">Walk on</button>
+              <button id="btn-reset" class="ghost">Reset</button>
+            </div>
           </div>
+          <div id="meters"></div>
         </div>
 
         <div class="layout">
           <div class="left">
             <div id="stats-panel" class="sub-panel"></div>
             <div id="skills-panel" class="sub-panel"></div>
+            <div id="pack-panel" class="sub-panel"></div>
           </div>
           <div class="right">
             <div id="log-panel" class="sub-panel">
-              <h3>Adventure Log</h3>
+              <h3>Adventure log</h3>
               <div id="log" class="log"></div>
             </div>
           </div>

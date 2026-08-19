@@ -1,13 +1,17 @@
 const STORAGE_KEY = 'idle-text-rpg-character';
+const SAVE_VERSION = 1;
 
 export function createCharacter(name, classId, classes) {
   const cls = classes.find(c => c.id === classId);
   if (!cls) throw new Error('Unknown class');
 
   const now = Date.now();
+  const trimmed = name.trim() || 'Wanderer';
+  const maxHp = 20 + cls.starting_stats.vitality * 3;
 
   return {
-    name: name.trim() || 'Wanderer',
+    version: SAVE_VERSION,
+    name: trimmed,
     classId: cls.id,
     className: cls.name,
     level: 1,
@@ -16,14 +20,14 @@ export function createCharacter(name, classId, classes) {
     unspentSkillPoints: 0,
     stats: { ...cls.starting_stats },
     growth: { ...cls.stat_growth },
-    hp: 20 + cls.starting_stats.vitality * 3,
-    maxHp: 20 + cls.starting_stats.vitality * 3,
+    hp: maxHp,
+    maxHp,
     locationId: 'loc_meadow_01',
     inventory: [],
     log: [{
       time: now,
       type: 'system',
-      text: `${name.trim() || 'Wanderer'} the ${cls.name} steps into the world.`
+      text: `${trimmed} the ${cls.name} steps into the world.`
     }],
     createdAt: now,
     lastTick: now,
@@ -31,22 +35,41 @@ export function createCharacter(name, classId, classes) {
   };
 }
 
+function migrate(raw) {
+  const next = { ...raw };
+  if (!next.version) next.version = SAVE_VERSION;
+  if (!Array.isArray(next.inventory)) next.inventory = [];
+  if (!Array.isArray(next.log)) next.log = [];
+  if (!next.stats) {
+    next.stats = { strength: 5, agility: 5, intelligence: 5, vitality: 5 };
+  }
+  return next;
+}
+
 export function getCharacter() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return null;
   try {
-    return JSON.parse(raw);
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    return migrate(JSON.parse(raw));
   } catch {
     return null;
   }
 }
 
 export function saveCharacter(char) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(char));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(char));
+  } catch {
+    // private mode / quota — keep playing in memory
+  }
 }
 
 export function resetCharacter() {
-  localStorage.removeItem(STORAGE_KEY);
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    /* ignore */
+  }
 }
 
 export function addXp(char, amount, config) {
@@ -54,7 +77,7 @@ export function addXp(char, amount, config) {
 
   while (char.level < 10) {
     const needed = config.xp_table[String(char.level + 1)];
-    if (char.xp < needed) break;
+    if (needed == null || char.xp < needed) break;
 
     char.level += 1;
     char.unspentSkillPoints += 2;
@@ -64,16 +87,15 @@ export function addXp(char, amount, config) {
     char.log.unshift({
       time: Date.now(),
       type: 'level',
-      text: `You reached level ${char.level}! +2 skill points.`
+      text: `You reached level ${char.level}. +2 skill points.`
     });
   }
 
-  // Keep xpToNext updated for UI
   if (char.level >= 10) {
     char.xpToNext = 0;
   } else {
-    const next = config.xp_table[String(char.level + 1)];
-    char.xpToNext = next - char.xp;
+    const next = config.xp_table[String(char.level + 1)] ?? char.xp;
+    char.xpToNext = Math.max(0, next - char.xp);
   }
 
   return char;
@@ -81,7 +103,7 @@ export function addXp(char, amount, config) {
 
 export function allocateSkill(char, stat) {
   if (char.unspentSkillPoints <= 0) return char;
-  if (!char.stats[stat]) return char;
+  if (!char.stats[stat] && char.stats[stat] !== 0) return char;
 
   char.stats[stat] += 1;
   char.unspentSkillPoints -= 1;

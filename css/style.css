@@ -1,16 +1,18 @@
 :root {
-  --bg: #0f1115;
-  --panel: #181b21;
-  --panel-2: #1e222a;
-  --border: #2a2f3a;
-  --text: #e6e8ec;
-  --text-dim: #9aa3b2;
-  --accent: #7c9cff;
-  --accent-dim: #5a7ae0;
-  --danger: #e86a6a;
-  --success: #6bcb8b;
-  --radius: 10px;
-  --font: "Segoe UI", system-ui, -apple-system, sans-serif;
+  --bg: #0c0d10;
+  --panel: #14161b;
+  --panel-2: #1b1e25;
+  --border: #2a2c31;
+  --text: #ece8e0;
+  --text-dim: #9a9488;
+  --accent: #c9c3b6;
+  --accent-fg: #0c0d10;
+  --danger: #c45c5c;
+  --success: #6a9e7d;
+  --radius: 16px;
+  --radius-sm: 8px;
+  --font: "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
 }
 
 * {
@@ -19,29 +21,32 @@
   padding: 0;
 }
 
+html, body {
+  min-height: 100%;
+}
+
 body {
   font-family: var(--font);
   background: var(--bg);
   color: var(--text);
   line-height: 1.5;
-  min-height: 100vh;
 }
 
 #app {
   max-width: 960px;
   margin: 0 auto;
-  padding: 2rem 1.25rem;
+  padding: 2.5rem 1.25rem 4rem;
 }
 
 header {
   margin-bottom: 2rem;
-  text-align: center;
 }
 
 header h1 {
-  font-size: 1.75rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 500;
+  letter-spacing: -0.03em;
 }
 
 .subtitle {
@@ -50,15 +55,30 @@ header h1 {
   margin-top: 0.25rem;
 }
 
-.panel {
+.panel,
+.top-card {
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 1.5rem;
+  padding: 1.75rem 1.5rem;
 }
 
 .hidden {
   display: none !important;
+}
+
+.lede {
+  color: var(--text-dim);
+  font-size: 0.95rem;
+  max-width: 36rem;
+  margin: 0.5rem 0 1.5rem;
+}
+
+h2 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
 }
 
 .form-group {
@@ -67,19 +87,24 @@ header h1 {
 
 label {
   display: block;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--text-dim);
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.45rem;
 }
 
 input[type="text"] {
   width: 100%;
-  padding: 0.65rem 0.8rem;
+  min-height: 44px;
+  padding: 0.65rem 0.85rem;
   background: var(--panel-2);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   color: var(--text);
   font-size: 1rem;
+  font-family: inherit;
 }
 
 input[type="text"]:focus {
@@ -89,46 +114,54 @@ input[type="text"]:focus {
 
 .class-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 0.75rem;
 }
 
 .class-card {
   background: var(--panel-2);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.9rem;
+  border-radius: 12px;
+  padding: 1rem;
   cursor: pointer;
+  text-align: left;
+  color: inherit;
+  font: inherit;
   transition: border-color 0.15s, background 0.15s;
+  min-height: 44px;
 }
 
 .class-card:hover {
-  border-color: var(--accent-dim);
+  border-color: color-mix(in oklab, var(--text) 22%, transparent);
 }
 
 .class-card.selected {
   border-color: var(--accent);
-  background: #1a2235;
+  background: var(--panel-2);
 }
 
 .class-card h4 {
-  font-size: 0.95rem;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 500;
   margin-bottom: 0.3rem;
 }
 
 .class-card p {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: var(--text-dim);
 }
 
 button {
   border: none;
-  border-radius: 6px;
-  padding: 0.65rem 1.1rem;
+  border-radius: var(--radius-sm);
+  padding: 0.7rem 1.1rem;
+  min-height: 44px;
   font-size: 0.9rem;
   font-weight: 500;
+  font-family: inherit;
   cursor: pointer;
-  transition: background 0.15s, opacity 0.15s;
+  transition: background 0.15s, opacity 0.15s, transform 0.15s, border-color 0.15s;
 }
 
 button:disabled {
@@ -136,15 +169,19 @@ button:disabled {
   cursor: not-allowed;
 }
 
+button:not(:disabled):active {
+  transform: scale(0.98);
+}
+
 button.primary {
   background: var(--accent);
-  color: #0f1115;
+  color: var(--accent-fg);
   width: 100%;
   margin-top: 0.5rem;
 }
 
 button.primary:hover:not(:disabled) {
-  background: #93adff;
+  filter: brightness(1.05);
 }
 
 button.secondary {
@@ -154,17 +191,20 @@ button.secondary {
 }
 
 button.secondary:hover {
-  background: #252a35;
+  border-color: color-mix(in oklab, var(--text) 25%, transparent);
 }
 
-button.danger {
+button.ghost {
   background: transparent;
-  color: var(--danger);
-  border: 1px solid var(--danger);
+  color: var(--text-dim);
 }
 
-button.danger:hover {
-  background: rgba(232, 106, 106, 0.1);
+button.ghost:hover {
+  color: var(--text);
+}
+
+.top-card {
+  margin-bottom: 1rem;
 }
 
 .top-bar {
@@ -172,21 +212,73 @@ button.danger:hover {
   justify-content: space-between;
   align-items: flex-start;
   gap: 1rem;
-  margin-bottom: 1.25rem;
   flex-wrap: wrap;
 }
 
-#char-summary {
-  font-size: 0.95rem;
+#char-summary .who {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 500;
 }
 
 #char-summary strong {
-  color: var(--accent);
+  color: var(--text);
+}
+
+#char-summary p {
+  font-size: 0.95rem;
+}
+
+.place {
+  margin-top: 0.35rem;
+}
+
+.place-desc {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  max-width: 32rem;
 }
 
 .actions {
   display: flex;
   gap: 0.5rem;
+}
+
+.meter {
+  margin-top: 1rem;
+}
+
+.meter-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin-bottom: 0.3rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.meter-track {
+  height: 6px;
+  background: var(--panel-2);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.meter-track.thin {
+  height: 4px;
+}
+
+.meter-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.meter-fill.hp {
+  background: var(--success);
+}
+
+.meter-fill.beat {
+  background: color-mix(in oklab, var(--accent) 70%, transparent);
 }
 
 .layout {
@@ -202,46 +294,64 @@ button.danger:hover {
 }
 
 .sub-panel {
-  background: var(--panel-2);
+  background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 1rem;
   margin-bottom: 1rem;
 }
 
 .sub-panel h3 {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
   color: var(--text-dim);
   margin-bottom: 0.75rem;
 }
 
-.stat-row {
+.stat-row,
+.pack-list li {
   display: flex;
   justify-content: space-between;
   font-size: 0.9rem;
   padding: 0.25rem 0;
+  text-transform: capitalize;
 }
 
-.stat-row span:last-child {
+.stat-row span:last-child,
+.pack-list li span:last-child {
   color: var(--accent);
   font-variant-numeric: tabular-nums;
 }
 
+.hint {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.hint.accent {
+  color: var(--accent);
+}
+
+.pack-list {
+  list-style: none;
+}
+
 .log {
-  max-height: 420px;
+  max-height: 560px;
   overflow-y: auto;
   font-size: 0.9rem;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.5rem;
 }
 
 .log-entry {
-  padding: 0.6rem 0.75rem;
+  padding: 0.65rem 0.75rem;
   background: var(--bg);
-  border-radius: 6px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
   border-left: 3px solid var(--border);
 }
 
@@ -249,31 +359,48 @@ button.danger:hover {
   border-left-color: var(--danger);
 }
 
-.log-entry.discovery {
+.log-entry.discovery,
+.log-entry.loot {
   border-left-color: var(--success);
 }
 
+.log-entry.travel,
+.log-entry.level,
+.log-entry.lore {
+  border-left-color: var(--accent);
+}
+
 .log-entry .meta {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--text-dim);
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.15rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .skill-points {
   margin-top: 0.75rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
 }
 
 .skill-points button {
-  margin-top: 0.4rem;
   width: 100%;
-  background: var(--panel);
+  display: flex;
+  justify-content: space-between;
+  background: var(--bg);
   color: var(--text);
   border: 1px solid var(--border);
-  font-size: 0.8rem;
+  font-size: 0.85rem;
 }
 
 .skill-points button:hover:not(:disabled) {
   border-color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button,
+  .class-card {
+    transition: none;
+  }
 }
