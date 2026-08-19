@@ -1,0 +1,28 @@
+{
+  "schools": [
+    {
+      "id": "iron_hall",
+      "name": "Iron Hall",
+      "classId": "warrior",
+      "description": "A yard of posts, sand, and ringing steel. Warriors learn to stand and strike."
+    },
+    {
+      "id": "greenwatch",
+      "name": "Greenwatch",
+      "classId": "ranger",
+      "description": "A timber lodge at the treeline. Rangers track, shoot, and read the wild."
+    },
+    {
+      "id": "lantern_archive",
+      "name": "Lantern Archive",
+      "classId": "mage",
+      "description": "Shelves, chalk, and quiet light. Mages study pattern and will."
+    },
+    {
+      "id": "quiet_ledger",
+      "name": "Quiet Ledger",
+      "classId": "rogue",
+      "description": "A back-room circle of ledgers and locked boxes. Rogues trade in silence and timing."
+    }
+  ]
+}
