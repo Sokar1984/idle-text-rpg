@@ -3,9 +3,15 @@ import {
   createCharacter,
   getCharacter,
   saveCharacter,
-  resetCharacter,
   allocateTraining
 } from './character.js';
+import {
+  loadProfile,
+  addCharacterToProfile,
+  setActiveCharacter,
+  canAddCharacter,
+  signInLocal
+} from './profile.js';
 import {
   advanceTime,
   catchUp,
@@ -16,8 +22,43 @@ import {
   completeBoardEvent
 } from './engine.js';
 import { renderCreation, renderGame, refreshMeters } from './ui.js';
+import {
+  renderShellNav,
+  renderProfileScreen,
+  renderGraveyardScreen
+} from './profile-ui.js';
 
 let data = null;
+let screen = 'game'; // game | profile | graveyard | creation
+
+function profileHandlers() {
+  return {
+    onNavigate: (target) => navigate(target),
+    onAddCharacter: () => {
+      if (!canAddCharacter()) return;
+      navigate('creation');
+    },
+    onPlayCharacter: (id) => {
+      setActiveCharacter(loadProfile(), id);
+      const char = getCharacter();
+      if (!char) return;
+      const { character } = catchUp(char, data);
+      saveCharacter(character);
+      navigate('game');
+      redraw(character);
+    },
+    onCharacterDeleted: () => {
+      const char = getCharacter();
+      if (!char) {
+        navigate(canAddCharacter() ? 'creation' : 'profile');
+        return;
+      }
+      // Stay on profile; shell updates
+      paintShell();
+    },
+    onProfileChanged: () => paintShell()
+  };
+}
 
 function handlers() {
   return {
@@ -25,6 +66,7 @@ function handlers() {
       const char = getCharacter();
       if (!char) return;
       const sub = zone === 'home' ? 'bedroom' : zone === 'village' ? 'vendor' : null;
+      if (zone === 'wilderness') char.wildernessActive = true;
       const updated = travelTo(char, data, zone, sub);
       saveCharacter(updated);
       redraw(updated);
@@ -75,27 +117,77 @@ function handlers() {
 }
 
 function redraw(char) {
+  if (screen !== 'game' || !char) return;
   renderGame(char, data, handlers());
+}
+
+function paintShell() {
+  renderShellNav({ screen }, profileHandlers());
+}
+
+function hideAllMain() {
+  ['creation', 'game', 'profile', 'graveyard'].forEach(id => {
+    document.getElementById(id)?.classList.add('hidden');
+  });
+}
+
+function navigate(target) {
+  const profile = loadProfile();
+
+  if (target === 'game' && !profile.activeCharacterId) {
+    target = profile.characters.length ? 'profile' : 'creation';
+  }
+
+  if (target === 'creation' && !canAddCharacter() && profile.characters.length > 0) {
+    target = 'profile';
+  }
+
+  screen = target;
+  hideAllMain();
+  paintShell();
+
+  if (target === 'game') {
+    document.getElementById('game').classList.remove('hidden');
+    const char = getCharacter();
+    if (char) redraw(char);
+  } else if (target === 'profile') {
+    document.getElementById('profile').classList.remove('hidden');
+    renderProfileScreen(profileHandlers());
+  } else if (target === 'graveyard') {
+    document.getElementById('graveyard').classList.remove('hidden');
+    renderGraveyardScreen(profileHandlers());
+  } else if (target === 'creation') {
+    document.getElementById('creation').classList.remove('hidden');
+    renderCreation(data, onCreate);
+  }
 }
 
 async function init() {
   data = await loadData();
   window.gameData = data;
 
+  // Ensure a local signed-in profile exists
+  signInLocal('Wanderer');
+
+  const profile = loadProfile();
   const char = getCharacter();
 
   if (char) {
     const { character } = catchUp(char, data);
     saveCharacter(character);
-    showGame();
+    navigate('game');
     redraw(character);
+  } else if (profile.characters.length) {
+    navigate('profile');
   } else {
-    showCreation();
-    renderCreation(data, onCreate);
+    navigate('creation');
   }
 
   document.getElementById('btn-tick')?.addEventListener('click', onTick);
-  document.getElementById('btn-reset')?.addEventListener('click', onReset);
+  document.getElementById('btn-profile')?.addEventListener('click', () => navigate('profile'));
+  document.getElementById('btn-cancel-create')?.addEventListener('click', () => {
+    navigate(getCharacter() ? 'game' : 'profile');
+  });
 
   setInterval(applyDueTicks, 1000);
   document.addEventListener('visibilitychange', () => {
@@ -103,29 +195,26 @@ async function init() {
   });
 }
 
-function showCreation() {
-  document.getElementById('creation').classList.remove('hidden');
-  document.getElementById('game').classList.add('hidden');
-}
-
-function showGame() {
-  document.getElementById('creation').classList.add('hidden');
-  document.getElementById('game').classList.remove('hidden');
-}
-
 function onCreate(opts) {
   const char = createCharacter(opts, data.classes, data.races);
-  saveCharacter(char);
-  showGame();
-  redraw(char);
+  const { profile, error } = addCharacterToProfile(char);
+  if (error) {
+    alert(error);
+    navigate('profile');
+    return;
+  }
+  setActiveCharacter(profile, char.id);
+  navigate('game');
+  redraw(getCharacter());
 }
 
 function applyDueTicks() {
+  if (screen !== 'game') return;
   const char = getCharacter();
   if (!char) return;
   const { character, ticks } = catchUp(char, data);
   if (ticks <= 0) {
-    refreshMeters(char, data);
+    if (typeof refreshMeters === 'function') refreshMeters(char, data);
     return;
   }
   saveCharacter(character);
@@ -138,23 +227,6 @@ function onTick() {
   const updated = advanceTime(char, data, 5);
   saveCharacter(updated);
   redraw(updated);
-}
-
-function onReset() {
-  const btn = document.getElementById('btn-reset');
-  if (btn.dataset.confirm !== '1') {
-    btn.dataset.confirm = '1';
-    btn.textContent = 'Confirm reset';
-    setTimeout(() => {
-      if (btn.dataset.confirm === '1') {
-        btn.dataset.confirm = '';
-        btn.textContent = 'Reset';
-      }
-    }, 4000);
-    return;
-  }
-  resetCharacter();
-  location.reload();
 }
 
 if (!window.__idleRpgStarted) {
