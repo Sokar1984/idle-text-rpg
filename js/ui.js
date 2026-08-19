@@ -53,6 +53,10 @@ function renderAvatarPreview(raceId, gender, style) {
   `;
 }
 
+function hoursLeft(evt, char) {
+  return Math.max(0, Math.ceil((evt.expiresAtHour || 0) - (char.gameHours || 0)));
+}
+
 export function renderCreation(data, onCreate) {
   const races = data.races;
   const classes = data.classes;
@@ -219,7 +223,6 @@ export function renderGame(char, data, handlers = {}) {
     </div>
   `;
 
-  // Zone navigation
   const zoneNav = document.getElementById('zone-nav');
   zoneNav.innerHTML = `
     <div class="zone-row">
@@ -233,7 +236,6 @@ export function renderGame(char, data, handlers = {}) {
     btn.addEventListener('click', () => handlers.onTravel?.(btn.dataset.zone));
   });
 
-  // Zone actions
   const actions = document.getElementById('zone-actions');
   let actionHtml = '';
   if (char.zone === 'home') {
@@ -258,13 +260,54 @@ export function renderGame(char, data, handlers = {}) {
     actionHtml = `<div class="zone-row"><span class="zone-label">Wilderness</span><span class="hint">Idle events and combat happen here.</span></div>`;
   }
   actions.innerHTML = actionHtml;
-
   actions.querySelectorAll('[data-sub]').forEach(btn => {
     btn.addEventListener('click', () => handlers.onSublocation?.(char.zone, btn.dataset.sub));
   });
   document.getElementById('btn-rest')?.addEventListener('click', () => handlers.onRest?.());
   document.getElementById('btn-sell')?.addEventListener('click', () => handlers.onSell?.());
   document.getElementById('btn-store')?.addEventListener('click', () => handlers.onStore?.());
+
+  // Board: Events / Quests tabs
+  const eventsEl = document.getElementById('board-events');
+  const questsEl = document.getElementById('board-quests');
+  const list = char.activeEvents || [];
+
+  if (!list.length) {
+    eventsEl.innerHTML = `<p class="hint">No active events. Keep living — offers appear over time (max 5).</p>`;
+  } else {
+    eventsEl.innerHTML = list.map(evt => {
+      const left = hoursLeft(evt, char);
+      return `
+        <button type="button" class="board-card" data-event-id="${evt.instanceId}">
+          <div class="board-card-title">${evt.name}</div>
+          <div class="board-card-desc">${evt.description}</div>
+          <div class="board-card-meta">
+            <span>${evt.risk || 'medium'} risk</span>
+            <span>+${evt.xpReward} XP</span>
+            <span>${left}h left</span>
+          </div>
+        </button>
+      `;
+    }).join('');
+    eventsEl.querySelectorAll('[data-event-id]').forEach(btn => {
+      btn.addEventListener('click', () => handlers.onCompleteEvent?.(btn.dataset.eventId));
+    });
+  }
+
+  const quests = char.activeQuests || [];
+  questsEl.innerHTML = quests.length
+    ? quests.map(q => `<div class="board-card"><div class="board-card-title">${q.name || 'Quest'}</div></div>`).join('')
+    : `<p class="hint">No quests yet. Completing events may open quests later.</p>`;
+
+  document.querySelectorAll('.board-tab').forEach(tab => {
+    tab.onclick = () => {
+      document.querySelectorAll('.board-tab').forEach(t => t.classList.remove('selected'));
+      tab.classList.add('selected');
+      const which = tab.dataset.tab;
+      eventsEl.classList.toggle('hidden', which !== 'events');
+      questsEl.classList.toggle('hidden', which !== 'quests');
+    };
+  });
 
   const statsEl = document.getElementById('stats-panel');
   statsEl.innerHTML = `
