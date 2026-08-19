@@ -1,7 +1,21 @@
-import { allocateSkill, saveCharacter, getCharacter } from './character.js';
+import { allocateSkill, saveCharacter, getCharacter, randomName } from './character.js';
 import { msUntilNextTick } from './engine.js';
 
-const STATS = ['strength', 'agility', 'intelligence', 'vitality'];
+const STATS = ['strength', 'agility', 'intelligence', 'vitality', 'charisma'];
+const AVATAR_STYLES = [
+  { id: 'neutral', label: 'Neutral' },
+  { id: 'beautiful', label: 'Beautiful' },
+  { id: 'ugly', label: 'Ugly' }
+];
+
+const RACE_COLORS = {
+  human: '#c4a574',
+  orc: '#5a8f5a',
+  'high-elf': '#a8d4e6',
+  'dark-elf': '#6b5b95',
+  demon: '#b33a3a',
+  dwarf: '#c49a6c'
+};
 
 function formatItem(id) {
   return id.replace(/_/g, ' ');
@@ -15,29 +29,141 @@ function stackedInventory(items) {
   return [...counts.entries()].sort((a, b) => b[1] - a[1]);
 }
 
-export function renderCreation(classes, onCreate) {
-  const container = document.getElementById('class-options');
-  container.innerHTML = '';
+function avatarPath(raceId, gender, style) {
+  return `avatars/${raceId}-${gender}-${style}.webp`;
+}
 
-  let selected = classes[0]?.id;
+function renderAvatarPreview(raceId, gender, style) {
+  const color = RACE_COLORS[raceId] || '#888';
+  const initial = (raceId || '?')[0].toUpperCase();
+  // Prefer image if present; fall back to colored glyph
+  return `
+    <div class="avatar-face" style="--race:${color}" data-src="${avatarPath(raceId, gender, style)}">
+      <span class="avatar-fallback">${initial}</span>
+      <img alt="" loading="lazy" onerror="this.style.display='none'" src="${avatarPath(raceId, gender, style)}" />
+    </div>
+  `;
+}
 
+export function renderCreation(data, onCreate) {
+  const races = data.races;
+  const classes = data.classes;
+
+  let selectedRace = races[0]?.id || 'human';
+  let selectedGender = 'male';
+  let selectedClass = classes[0]?.id;
+  let selectedAvatar = 'neutral';
+
+  const raceBox = document.getElementById('race-options');
+  const genderBox = document.getElementById('gender-options');
+  const avatarBox = document.getElementById('avatar-options');
+  const classBox = document.getElementById('class-options');
+  const nameInput = document.getElementById('char-name');
+  const raceDetail = document.getElementById('race-detail');
+
+  function currentRace() {
+    return races.find(r => r.id === selectedRace);
+  }
+
+  function suggestName() {
+    nameInput.value = randomName(currentRace(), selectedGender);
+  }
+
+  function refreshRaceDetail() {
+    const race = currentRace();
+    if (!race) return;
+    const bonusText = Object.entries(race.bonuses)
+      .filter(([, v]) => v !== 0)
+      .map(([k, v]) => `${v > 0 ? '+' : ''}${v} ${k}`)
+      .join(', ');
+    raceDetail.innerHTML = `
+      <strong>${race.name}</strong> — ${race.description}<br/>
+      <span class="muted">${bonusText || 'No stat modifiers'}</span><br/>
+      <span class="muted">▲ ${race.advantages.join(' · ')}</span><br/>
+      <span class="muted">▼ ${race.disadvantages.join(' · ')}</span>
+    `;
+  }
+
+  function refreshAvatars() {
+    avatarBox.innerHTML = '';
+    AVATAR_STYLES.forEach(style => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'avatar-card' + (style.id === selectedAvatar ? ' selected' : '');
+      btn.innerHTML = `${renderAvatarPreview(selectedRace, selectedGender, style.id)}<span>${style.label}</span>`;
+      btn.addEventListener('click', () => {
+        selectedAvatar = style.id;
+        refreshAvatars();
+      });
+      avatarBox.appendChild(btn);
+    });
+  }
+
+  // Races
+  raceBox.innerHTML = '';
+  races.forEach(race => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'option-chip' + (race.id === selectedRace ? ' selected' : '');
+    btn.textContent = race.name;
+    btn.addEventListener('click', () => {
+      selectedRace = race.id;
+      raceBox.querySelectorAll('.option-chip').forEach(c => c.classList.remove('selected'));
+      btn.classList.add('selected');
+      refreshRaceDetail();
+      refreshAvatars();
+      suggestName();
+    });
+    raceBox.appendChild(btn);
+  });
+
+  // Gender
+  genderBox.innerHTML = '';
+  ['male', 'female'].forEach(g => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'option-chip' + (g === selectedGender ? ' selected' : '');
+    btn.textContent = g.charAt(0).toUpperCase() + g.slice(1);
+    btn.addEventListener('click', () => {
+      selectedGender = g;
+      genderBox.querySelectorAll('.option-chip').forEach(c => c.classList.remove('selected'));
+      btn.classList.add('selected');
+      refreshAvatars();
+      suggestName();
+    });
+    genderBox.appendChild(btn);
+  });
+
+  // Classes
+  classBox.innerHTML = '';
   classes.forEach(cls => {
     const card = document.createElement('button');
     card.type = 'button';
-    card.className = 'class-card' + (cls.id === selected ? ' selected' : '');
+    card.className = 'class-card' + (cls.id === selectedClass ? ' selected' : '');
     card.innerHTML = `<h4>${cls.name}</h4><p>${cls.description}</p>`;
     card.addEventListener('click', () => {
-      selected = cls.id;
-      container.querySelectorAll('.class-card').forEach(c => c.classList.remove('selected'));
+      selectedClass = cls.id;
+      classBox.querySelectorAll('.class-card').forEach(c => c.classList.remove('selected'));
       card.classList.add('selected');
     });
-    container.appendChild(card);
+    classBox.appendChild(card);
   });
 
+  document.getElementById('btn-reroll-name').onclick = suggestName;
+
   document.getElementById('btn-create').onclick = () => {
-    const name = document.getElementById('char-name').value;
-    onCreate(name, selected);
+    onCreate({
+      name: nameInput.value,
+      classId: selectedClass,
+      raceId: selectedRace,
+      gender: selectedGender,
+      avatarStyle: selectedAvatar
+    });
   };
+
+  refreshRaceDetail();
+  refreshAvatars();
+  suggestName();
 }
 
 export function renderGame(char, data) {
@@ -46,11 +172,20 @@ export function renderGame(char, data) {
     ? `${Math.floor(char.xp)} XP (${Math.ceil(char.xpToNext)} to next)`
     : 'Max';
 
+  const raceLabel = char.raceName || 'Unknown';
+  const genderLabel = char.gender ? char.gender.charAt(0).toUpperCase() + char.gender.slice(1) : '';
+
   document.getElementById('char-summary').innerHTML = `
-    <p class="who"><strong>${char.name}</strong> the ${char.className}</p>
-    <p>Level ${char.level} · ${xpLine}</p>
-    <p class="place">${loc ? loc.name : 'Unknown location'}</p>
-    <p class="place-desc">${loc ? loc.description : ''}</p>
+    <div class="summary-with-avatar">
+      ${renderAvatarPreview(char.raceId || 'human', char.gender || 'male', char.avatarStyle || 'neutral')}
+      <div>
+        <p class="who"><strong>${char.name}</strong></p>
+        <p>${raceLabel} ${char.className}${genderLabel ? ' · ' + genderLabel : ''}</p>
+        <p>Level ${char.level} · ${xpLine}</p>
+        <p class="place">${loc ? loc.name : 'Unknown location'}</p>
+        <p class="place-desc">${loc ? loc.description : ''}</p>
+      </div>
+    </div>
   `;
 
   const hpPct = Math.max(0, Math.min(100, (char.hp / char.maxHp) * 100));
@@ -76,7 +211,7 @@ export function renderGame(char, data) {
     ${STATS.map(stat => `
       <div class="stat-row">
         <span>${stat.charAt(0).toUpperCase() + stat.slice(1)}</span>
-        <span>${char.stats[stat]}</span>
+        <span>${char.stats[stat] ?? '—'}</span>
       </div>
     `).join('')}
   `;
