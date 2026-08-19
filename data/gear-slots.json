@@ -1,0 +1,20 @@
+{
+  "slots": [
+    { "id": "head", "name": "Head", "type": "gear", "accepts": ["helm", "hood", "circlet"] },
+    { "id": "chest", "name": "Chest", "type": "gear", "accepts": ["armor", "robe", "vest"] },
+    { "id": "hands", "name": "Hands", "type": "gear", "accepts": ["gloves", "gauntlets", "wraps"] },
+    { "id": "legs", "name": "Legs", "type": "gear", "accepts": ["greaves", "pants", "skirt"] },
+    { "id": "feet", "name": "Feet", "type": "gear", "accepts": ["boots", "sandals"] },
+    { "id": "main_hand", "name": "Main Hand", "type": "gear", "accepts": ["weapon", "staff", "bow", "dagger", "sword"] },
+    { "id": "off_hand", "name": "Off Hand", "type": "gear", "accepts": ["shield", "focus", "offhand", "torch"] },
+    { "id": "accessory", "name": "Accessory", "type": "gear", "accepts": ["ring", "amulet", "cloak"] },
+    { "id": "custom_1", "name": "Satchel A", "type": "custom", "accepts": ["special", "potion", "charm"] },
+    { "id": "custom_2", "name": "Satchel B", "type": "custom", "accepts": ["special", "potion", "charm"] }
+  ],
+  "class_weapon_bias": {
+    "warrior": ["sword", "shield", "armor"],
+    "ranger": ["bow", "vest", "boots"],
+    "mage": ["staff", "robe", "focus"],
+    "rogue": ["dagger", "hood", "wraps"]
+  }
+}
