@@ -67,3 +67,37 @@
   color: var(--accent);
   text-transform: capitalize;
 }
+
+.option-chip.locked,
+.option-chip:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+.train-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.55rem;
+}
+
+.train-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+
+.train-row button {
+  align-self: flex-end;
+  min-height: 32px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.75rem;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.train-row button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
