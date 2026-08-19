@@ -18,7 +18,7 @@ async function init() {
     renderGame(character, data);
   } else {
     showCreation();
-    renderCreation(data.classes, onCreate);
+    renderCreation(data, onCreate);
   }
 
   document.getElementById('btn-tick')?.addEventListener('click', onTick);
@@ -40,8 +40,8 @@ function showGame() {
   document.getElementById('game').classList.remove('hidden');
 }
 
-function onCreate(name, classId) {
-  const char = createCharacter(name, classId, data.classes);
+function onCreate(opts) {
+  const char = createCharacter(opts, data.classes, data.races);
   advanceTime(char, data, 3);
   saveCharacter(char);
   showGame();
