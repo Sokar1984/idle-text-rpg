@@ -6,7 +6,8 @@ import {
   travelTo,
   restAtHome,
   sellAllAtVendor,
-  moveToStorage
+  moveToStorage,
+  completeBoardEvent
 } from './engine.js';
 import { renderCreation, renderGame } from './ui.js';
 
@@ -47,6 +48,13 @@ function handlers() {
       const char = getCharacter();
       if (!char) return;
       const updated = moveToStorage(char, data);
+      saveCharacter(updated);
+      redraw(updated);
+    },
+    onCompleteEvent: (instanceId) => {
+      const char = getCharacter();
+      if (!char) return;
+      const updated = completeBoardEvent(char, data, instanceId);
       saveCharacter(updated);
       redraw(updated);
     }
@@ -94,7 +102,6 @@ function showGame() {
 
 function onCreate(opts) {
   const char = createCharacter(opts, data.classes, data.races);
-  // Start at home; first venture is the player's choice
   saveCharacter(char);
   showGame();
   redraw(char);
