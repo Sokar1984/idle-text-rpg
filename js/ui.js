@@ -1,4 +1,13 @@
-import { allocateSkill, saveCharacter, getCharacter, randomName } from './character.js';
+import {
+  allocateSkill,
+  saveCharacter,
+  getCharacter,
+  randomName,
+  formatCoins,
+  formatGameTime,
+  inventoryCapacity,
+  inventoryUsed
+} from './character.js';
 import { msUntilNextTick } from './engine.js';
 
 const STATS = ['strength', 'agility', 'intelligence', 'vitality', 'charisma'];
@@ -36,7 +45,6 @@ function avatarPath(raceId, gender, style) {
 function renderAvatarPreview(raceId, gender, style) {
   const color = RACE_COLORS[raceId] || '#888';
   const initial = (raceId || '?')[0].toUpperCase();
-  // Prefer image if present; fall back to colored glyph
   return `
     <div class="avatar-face" style="--race:${color}" data-src="${avatarPath(raceId, gender, style)}">
       <span class="avatar-fallback">${initial}</span>
@@ -99,7 +107,6 @@ export function renderCreation(data, onCreate) {
     });
   }
 
-  // Races
   raceBox.innerHTML = '';
   races.forEach(race => {
     const btn = document.createElement('button');
@@ -117,7 +124,6 @@ export function renderCreation(data, onCreate) {
     raceBox.appendChild(btn);
   });
 
-  // Gender
   genderBox.innerHTML = '';
   ['male', 'female'].forEach(g => {
     const btn = document.createElement('button');
@@ -134,7 +140,6 @@ export function renderCreation(data, onCreate) {
     genderBox.appendChild(btn);
   });
 
-  // Classes
   classBox.innerHTML = '';
   classes.forEach(cls => {
     const card = document.createElement('button');
@@ -150,7 +155,6 @@ export function renderCreation(data, onCreate) {
   });
 
   document.getElementById('btn-reroll-name').onclick = suggestName;
-
   document.getElementById('btn-create').onclick = () => {
     onCreate({
       name: nameInput.value,
@@ -166,11 +170,15 @@ export function renderCreation(data, onCreate) {
   suggestName();
 }
 
-export function renderGame(char, data) {
+export function renderGame(char, data, handlers = {}) {
   const loc = data.locations.find(l => l.id === char.locationId);
   const xpLine = char.level < 10
     ? `${Math.floor(char.xp)} XP (${Math.ceil(char.xpToNext)} to next)`
     : 'Max';
+  const t = formatGameTime(char, data.config);
+  const coins = formatCoins(char.copper || 0, data.items?.currency);
+  const cap = inventoryCapacity(char, data.config);
+  const used = inventoryUsed(char);
 
   const raceLabel = char.raceName || 'Unknown';
   const genderLabel = char.gender ? char.gender.charAt(0).toUpperCase() + char.gender.slice(1) : '';
@@ -182,10 +190,16 @@ export function renderGame(char, data) {
         <p class="who"><strong>${char.name}</strong></p>
         <p>${raceLabel} ${char.className}${genderLabel ? ' · ' + genderLabel : ''}</p>
         <p>Level ${char.level} · ${xpLine}</p>
-        <p class="place">${loc ? loc.name : 'Unknown location'}</p>
-        <p class="place-desc">${loc ? loc.description : ''}</p>
+        <p class="place">Zone: <strong>${char.zone}</strong>${char.sublocation ? ' / ' + char.sublocation : ''}</p>
+        ${char.zone === 'wilderness' && loc ? `<p class="place-desc">${loc.name} — ${loc.description}</p>` : ''}
       </div>
     </div>
+  `;
+
+  document.getElementById('calendar').innerHTML = `
+    Year ${t.year}, day ${t.dayOfYear}, hour ${t.hourOfDay}
+    · Age ${t.ageLabel}
+    · Purse ${coins}
   `;
 
   const hpPct = Math.max(0, Math.min(100, (char.hp / char.maxHp) * 100));
@@ -204,6 +218,53 @@ export function renderGame(char, data) {
       <div class="meter-track thin"><div class="meter-fill beat" style="width:${beatPct}%"></div></div>
     </div>
   `;
+
+  // Zone navigation
+  const zoneNav = document.getElementById('zone-nav');
+  zoneNav.innerHTML = `
+    <div class="zone-row">
+      <span class="zone-label">Travel</span>
+      <button data-zone="wilderness" class="option-chip ${char.zone === 'wilderness' ? 'selected' : ''}">Wilderness</button>
+      <button data-zone="village" class="option-chip ${char.zone === 'village' ? 'selected' : ''}">Village</button>
+      <button data-zone="home" class="option-chip ${char.zone === 'home' ? 'selected' : ''}">Home</button>
+    </div>
+  `;
+  zoneNav.querySelectorAll('[data-zone]').forEach(btn => {
+    btn.addEventListener('click', () => handlers.onTravel?.(btn.dataset.zone));
+  });
+
+  // Zone actions
+  const actions = document.getElementById('zone-actions');
+  let actionHtml = '';
+  if (char.zone === 'home') {
+    actionHtml = `
+      <div class="zone-row">
+        <span class="zone-label">Home</span>
+        <button data-sub="bedroom" class="option-chip ${char.sublocation === 'bedroom' ? 'selected' : ''}">Bedroom</button>
+        <button data-sub="kitchen" class="option-chip ${char.sublocation === 'kitchen' ? 'selected' : ''}">Kitchen</button>
+        <button data-sub="storage" class="option-chip ${char.sublocation === 'storage' ? 'selected' : ''}">Storage</button>
+        <button id="btn-rest" class="secondary compact">Rest & heal</button>
+        ${char.sublocation === 'storage' ? '<button id="btn-store" class="secondary compact">Store pack</button>' : ''}
+      </div>`;
+  } else if (char.zone === 'village') {
+    actionHtml = `
+      <div class="zone-row">
+        <span class="zone-label">Village</span>
+        <button data-sub="vendor" class="option-chip ${char.sublocation === 'vendor' ? 'selected' : ''}">Vendor</button>
+        <button data-sub="school" class="option-chip ${char.sublocation === 'school' ? 'selected' : ''}">School</button>
+        ${char.sublocation === 'vendor' ? '<button id="btn-sell" class="secondary compact">Sell all loot</button>' : ''}
+      </div>`;
+  } else {
+    actionHtml = `<div class="zone-row"><span class="zone-label">Wilderness</span><span class="hint">Idle events and combat happen here.</span></div>`;
+  }
+  actions.innerHTML = actionHtml;
+
+  actions.querySelectorAll('[data-sub]').forEach(btn => {
+    btn.addEventListener('click', () => handlers.onSublocation?.(char.zone, btn.dataset.sub));
+  });
+  document.getElementById('btn-rest')?.addEventListener('click', () => handlers.onRest?.());
+  document.getElementById('btn-sell')?.addEventListener('click', () => handlers.onSell?.());
+  document.getElementById('btn-store')?.addEventListener('click', () => handlers.onStore?.());
 
   const statsEl = document.getElementById('stats-panel');
   statsEl.innerHTML = `
@@ -229,24 +290,25 @@ export function renderGame(char, data) {
     skillsHtml += `<p class="hint">No unspent points.</p>`;
   }
   skillsEl.innerHTML = skillsHtml;
-
   skillsEl.querySelectorAll('button[data-stat]').forEach(btn => {
     btn.addEventListener('click', () => {
       const updated = allocateSkill(getCharacter(), btn.dataset.stat);
       saveCharacter(updated);
-      renderGame(updated, data);
+      renderGame(updated, data, handlers);
     });
   });
 
   const packEl = document.getElementById('pack-panel');
   const stacked = stackedInventory(char.inventory);
   packEl.innerHTML = `
-    <h3>Pack</h3>
+    <h3>Pack (${used}/${cap})</h3>
+    <p class="hint">Purse: ${coins}</p>
     ${stacked.length === 0
       ? `<p class="hint">Nothing carried yet.</p>`
       : `<ul class="pack-list">${stacked.map(([item, count]) =>
           `<li><span>${formatItem(item)}</span><span>×${count}</span></li>`
         ).join('')}</ul>`}
+    ${char.storage?.length ? `<p class="hint" style="margin-top:0.5rem">Home storage: ${char.storage.length} items</p>` : ''}
   `;
 
   const logEl = document.getElementById('log');
