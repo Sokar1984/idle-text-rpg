@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'idle-text-rpg-character';
-const SAVE_VERSION = 3;
+const SAVE_VERSION = 4;
 
 export function inventoryCapacity(char, config) {
   const base = config.inventory_base_slots ?? 8;
@@ -105,6 +105,8 @@ export function createCharacter({ name, classId, raceId, gender, avatarStyle }, 
     copper: 0,
     storage: [],
     gameHours: 0,
+    activeEvents: [],
+    activeQuests: [],
     log: [{
       time: now,
       type: 'system',
@@ -118,10 +120,11 @@ export function createCharacter({ name, classId, raceId, gender, avatarStyle }, 
 
 function migrate(raw) {
   const next = { ...raw };
-  if (!next.version) next.version = SAVE_VERSION;
   if (!Array.isArray(next.inventory)) next.inventory = [];
   if (!Array.isArray(next.storage)) next.storage = [];
   if (!Array.isArray(next.log)) next.log = [];
+  if (!Array.isArray(next.activeEvents)) next.activeEvents = [];
+  if (!Array.isArray(next.activeQuests)) next.activeQuests = [];
   if (!next.stats) {
     next.stats = { strength: 5, agility: 5, intelligence: 5, vitality: 5, charisma: 5 };
   }
@@ -134,9 +137,6 @@ function migrate(raw) {
   if (next.sublocation === undefined) next.sublocation = null;
   if (next.copper == null) next.copper = 0;
   if (next.gameHours == null) next.gameHours = 0;
-  if (next.maxHp && next.stats?.vitality) {
-    // keep existing
-  }
   next.version = SAVE_VERSION;
   return next;
 }
@@ -177,7 +177,6 @@ export function addXp(char, amount, config) {
     char.level += 1;
     char.unspentSkillPoints += 2;
     char.maxHp += 6 + Math.floor(char.stats.vitality * 0.5);
-    // Level-up does not auto-heal fully while wounded in the field
     char.hp = Math.min(char.maxHp, char.hp + Math.round(char.maxHp * 0.2));
 
     char.log.unshift({
