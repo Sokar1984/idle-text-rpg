@@ -1,25 +1,43 @@
 const STORAGE_KEY = 'idle-text-rpg-character';
-const SAVE_VERSION = 1;
+const SAVE_VERSION = 2;
 
-export function createCharacter(name, classId, classes) {
+export function createCharacter({ name, classId, raceId, gender, avatarStyle }, classes, races) {
   const cls = classes.find(c => c.id === classId);
+  const race = races.find(r => r.id === raceId);
   if (!cls) throw new Error('Unknown class');
+  if (!race) throw new Error('Unknown race');
 
   const now = Date.now();
-  const trimmed = name.trim() || 'Wanderer';
-  const maxHp = 20 + cls.starting_stats.vitality * 3;
+  const trimmed = (name || '').trim() || 'Wanderer';
+
+  const stats = {
+    strength: cls.starting_stats.strength + (race.bonuses.strength || 0),
+    agility: cls.starting_stats.agility + (race.bonuses.agility || 0),
+    intelligence: cls.starting_stats.intelligence + (race.bonuses.intelligence || 0),
+    vitality: cls.starting_stats.vitality + (race.bonuses.vitality || 0),
+    charisma: (cls.starting_stats.charisma || 4) + (race.bonuses.charisma || 0)
+  };
+
+  // Floor at 1 so nothing goes negative
+  Object.keys(stats).forEach(k => { stats[k] = Math.max(1, stats[k]); });
+
+  const maxHp = 20 + stats.vitality * 3;
 
   return {
     version: SAVE_VERSION,
     name: trimmed,
     classId: cls.id,
     className: cls.name,
+    raceId: race.id,
+    raceName: race.name,
+    gender: gender || 'male',
+    avatarStyle: avatarStyle || 'neutral',
     level: 1,
     xp: 0,
     xpToNext: 40,
     unspentSkillPoints: 0,
-    stats: { ...cls.starting_stats },
-    growth: { ...cls.stat_growth },
+    stats,
+    growth: { ...cls.stat_growth, charisma: cls.stat_growth.charisma ?? 1.0 },
     hp: maxHp,
     maxHp,
     locationId: 'loc_meadow_01',
@@ -27,7 +45,7 @@ export function createCharacter(name, classId, classes) {
     log: [{
       time: now,
       type: 'system',
-      text: `${trimmed} the ${cls.name} steps into the world.`
+      text: `${trimmed} the ${race.name} ${cls.name} steps into the world.`
     }],
     createdAt: now,
     lastTick: now,
@@ -41,8 +59,13 @@ function migrate(raw) {
   if (!Array.isArray(next.inventory)) next.inventory = [];
   if (!Array.isArray(next.log)) next.log = [];
   if (!next.stats) {
-    next.stats = { strength: 5, agility: 5, intelligence: 5, vitality: 5 };
+    next.stats = { strength: 5, agility: 5, intelligence: 5, vitality: 5, charisma: 5 };
   }
+  if (next.stats.charisma == null) next.stats.charisma = 5;
+  if (!next.raceId) next.raceId = 'human';
+  if (!next.raceName) next.raceName = 'Human';
+  if (!next.gender) next.gender = 'male';
+  if (!next.avatarStyle) next.avatarStyle = 'neutral';
   return next;
 }
 
@@ -60,7 +83,7 @@ export function saveCharacter(char) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(char));
   } catch {
-    // private mode / quota — keep playing in memory
+    // private mode / quota
   }
 }
 
@@ -103,7 +126,7 @@ export function addXp(char, amount, config) {
 
 export function allocateSkill(char, stat) {
   if (char.unspentSkillPoints <= 0) return char;
-  if (!char.stats[stat] && char.stats[stat] !== 0) return char;
+  if (char.stats[stat] == null) return char;
 
   char.stats[stat] += 1;
   char.unspentSkillPoints -= 1;
@@ -114,4 +137,10 @@ export function allocateSkill(char, stat) {
   }
 
   return char;
+}
+
+export function randomName(race, gender) {
+  const list = race?.names?.[gender];
+  if (!list || !list.length) return 'Wanderer';
+  return list[Math.floor(Math.random() * list.length)];
 }
