@@ -1,5 +1,26 @@
 const STORAGE_KEY = 'idle-text-rpg-character';
-const SAVE_VERSION = 4;
+const SAVE_VERSION = 5;
+
+const DEFAULT_EQUIPMENT = {
+  head: null,
+  chest: null,
+  hands: null,
+  legs: null,
+  feet: null,
+  main_hand: null,
+  off_hand: null,
+  accessory: null,
+  custom_1: null,
+  custom_2: null
+};
+
+const DEFAULT_SKILLS = {
+  unarmed: 0,
+  armed: 0,
+  survival: 0,
+  crafting: 0,
+  apothecary: 0
+};
 
 export function inventoryCapacity(char, config) {
   const base = config.inventory_base_slots ?? 8;
@@ -61,6 +82,26 @@ export function formatGameTime(char, config) {
   };
 }
 
+/** Percent gained when spending one training point on a skill. */
+export function trainingGainFor(skillId, char, skillsData) {
+  const def = (skillsData || []).find(s => s.id === skillId);
+  const stats = char.stats || {};
+  const keys = def?.primary_stats || ['strength'];
+  const avg = keys.reduce((sum, k) => sum + (stats[k] || 1), 0) / keys.length;
+  // ~2–6% per point: even many levels cannot max every skill
+  const gain = 1.8 + avg / 8;
+  return Math.max(1.5, Math.min(6.5, Math.round(gain * 10) / 10));
+}
+
+export function skillDisplayName(skillId, classId, skillsData) {
+  const def = (skillsData || []).find(s => s.id === skillId);
+  if (!def) return skillId;
+  if (skillId === 'armed' && def.class_names?.[classId]) {
+    return def.class_names[classId];
+  }
+  return def.name;
+}
+
 export function createCharacter({ name, classId, raceId, gender, avatarStyle }, classes, races) {
   const cls = classes.find(c => c.id === classId);
   const race = races.find(r => r.id === raceId);
@@ -94,8 +135,11 @@ export function createCharacter({ name, classId, raceId, gender, avatarStyle }, 
     xp: 0,
     xpToNext: 40,
     unspentSkillPoints: 0,
+    trainingPoints: 0,
     stats,
     growth: { ...cls.stat_growth, charisma: cls.stat_growth.charisma ?? 1.0 },
+    skills: { ...DEFAULT_SKILLS },
+    equipment: { ...DEFAULT_EQUIPMENT },
     hp: maxHp,
     maxHp,
     zone: 'home',
@@ -137,6 +181,15 @@ function migrate(raw) {
   if (next.sublocation === undefined) next.sublocation = null;
   if (next.copper == null) next.copper = 0;
   if (next.gameHours == null) next.gameHours = 0;
+  if (!next.skills) next.skills = { ...DEFAULT_SKILLS };
+  for (const k of Object.keys(DEFAULT_SKILLS)) {
+    if (next.skills[k] == null) next.skills[k] = 0;
+  }
+  if (!next.equipment) next.equipment = { ...DEFAULT_EQUIPMENT };
+  for (const k of Object.keys(DEFAULT_EQUIPMENT)) {
+    if (next.equipment[k] === undefined) next.equipment[k] = null;
+  }
+  if (next.trainingPoints == null) next.trainingPoints = 0;
   next.version = SAVE_VERSION;
   return next;
 }
@@ -176,13 +229,14 @@ export function addXp(char, amount, config) {
 
     char.level += 1;
     char.unspentSkillPoints += 2;
+    char.trainingPoints = (char.trainingPoints || 0) + 1;
     char.maxHp += 6 + Math.floor(char.stats.vitality * 0.5);
     char.hp = Math.min(char.maxHp, char.hp + Math.round(char.maxHp * 0.2));
 
     char.log.unshift({
       time: Date.now(),
       type: 'level',
-      text: `You reached level ${char.level}. +2 skill points.`
+      text: `You reached level ${char.level}. +2 attribute points, +1 training point.`
     });
   }
 
@@ -208,6 +262,19 @@ export function allocateSkill(char, stat) {
     char.hp += 4;
   }
 
+  return char;
+}
+
+/** Spend one training point into a 0–100 skill. */
+export function allocateTraining(char, skillId, skillsData) {
+  if ((char.trainingPoints || 0) <= 0) return char;
+  if (!char.skills) char.skills = { ...DEFAULT_SKILLS };
+  if (char.skills[skillId] == null) return char;
+  if (char.skills[skillId] >= 100) return char;
+
+  const gain = trainingGainFor(skillId, char, skillsData);
+  char.skills[skillId] = Math.min(100, Math.round((char.skills[skillId] + gain) * 10) / 10);
+  char.trainingPoints -= 1;
   return char;
 }
 
