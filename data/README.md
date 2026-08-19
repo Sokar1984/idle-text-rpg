@@ -1,11 +1,17 @@
 # Data
 
-This folder will hold the actual content templates:
+This folder contains the actual game content and configuration.
 
-- `locations.json` (or split files)
-- `monsters.json`
-- `events.json`
+## Files
 
-All templates should follow the schemas defined in `/schemas`.
+| File | Purpose |
+|------|--------|
+| `config.json` | Core timing, XP curve, and balance settings (tuned for ~24h to level 10) |
+| `classes.json` | Playable classes, starting stats, and growth rates |
+| `locations.json` | Location templates (levels 1–10) |
+| `monsters.json` | Monster / encounter templates (levels 1–10) |
+| `events.json` | Event templates (levels 1–10) |
 
-AIs generating new content should add it here (or in clearly named sub-files) so the game engine can load it.
+All content templates follow the schemas defined in `/schemas`.
+
+AIs generating new content should add it here while respecting the existing structure and level ranges.
