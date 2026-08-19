@@ -9,6 +9,11 @@ import {
   inventoryUsed
 } from './character.js';
 import { msUntilNextTick } from './engine.js';
+import {
+  renderVillageActions,
+  renderTrainingPanel,
+  renderGearPanel
+} from './panels.js';
 
 const STATS = ['strength', 'agility', 'intelligence', 'vitality', 'charisma'];
 const AVATAR_STYLES = [
@@ -249,25 +254,18 @@ export function renderGame(char, data, handlers = {}) {
         ${char.sublocation === 'storage' ? '<button id="btn-store" class="secondary compact">Store pack</button>' : ''}
       </div>`;
   } else if (char.zone === 'village') {
-    actionHtml = `
-      <div class="zone-row">
-        <span class="zone-label">Village</span>
-        <button data-sub="vendor" class="option-chip ${char.sublocation === 'vendor' ? 'selected' : ''}">Vendor</button>
-        <button data-sub="school" class="option-chip ${char.sublocation === 'school' ? 'selected' : ''}">School</button>
-        ${char.sublocation === 'vendor' ? '<button id="btn-sell" class="secondary compact">Sell all loot</button>' : ''}
-      </div>`;
+    actionHtml = renderVillageActions(char, data, handlers);
   } else {
     actionHtml = `<div class="zone-row"><span class="zone-label">Wilderness</span><span class="hint">Idle events and combat happen here.</span></div>`;
   }
   actions.innerHTML = actionHtml;
-  actions.querySelectorAll('[data-sub]').forEach(btn => {
+  actions.querySelectorAll('[data-sub]:not([disabled])').forEach(btn => {
     btn.addEventListener('click', () => handlers.onSublocation?.(char.zone, btn.dataset.sub));
   });
   document.getElementById('btn-rest')?.addEventListener('click', () => handlers.onRest?.());
   document.getElementById('btn-sell')?.addEventListener('click', () => handlers.onSell?.());
   document.getElementById('btn-store')?.addEventListener('click', () => handlers.onStore?.());
 
-  // Board: Events / Quests tabs
   const eventsEl = document.getElementById('board-events');
   const questsEl = document.getElementById('board-quests');
   const list = char.activeEvents || [];
@@ -311,7 +309,7 @@ export function renderGame(char, data, handlers = {}) {
 
   const statsEl = document.getElementById('stats-panel');
   statsEl.innerHTML = `
-    <h3>Stats</h3>
+    <h3>Attributes</h3>
     ${STATS.map(stat => `
       <div class="stat-row">
         <span>${stat.charAt(0).toUpperCase() + stat.slice(1)}</span>
@@ -321,7 +319,7 @@ export function renderGame(char, data, handlers = {}) {
   `;
 
   const skillsEl = document.getElementById('skills-panel');
-  let skillsHtml = `<h3>Skills</h3>`;
+  let skillsHtml = `<h3>Attributes to raise</h3>`;
   if (char.unspentSkillPoints > 0) {
     skillsHtml += `<p class="hint accent">${char.unspentSkillPoints} point${char.unspentSkillPoints > 1 ? 's' : ''} waiting</p>`;
     skillsHtml += `<div class="skill-points">`;
@@ -330,7 +328,7 @@ export function renderGame(char, data, handlers = {}) {
     });
     skillsHtml += `</div>`;
   } else {
-    skillsHtml += `<p class="hint">No unspent points.</p>`;
+    skillsHtml += `<p class="hint">No unspent attribute points.</p>`;
   }
   skillsEl.innerHTML = skillsHtml;
   skillsEl.querySelectorAll('button[data-stat]').forEach(btn => {
@@ -340,6 +338,9 @@ export function renderGame(char, data, handlers = {}) {
       renderGame(updated, data, handlers);
     });
   });
+
+  renderTrainingPanel(char, data, handlers);
+  renderGearPanel(char, data);
 
   const packEl = document.getElementById('pack-panel');
   const stacked = stackedInventory(char.inventory);
