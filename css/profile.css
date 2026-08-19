@@ -1,0 +1,131 @@
+.shell-nav {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.shell-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.shell-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.shell-user {
+  font-family: var(--font-display);
+  font-size: 1rem;
+}
+
+.shell-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.shell-actions .selected {
+  border-color: var(--accent);
+}
+
+.profile-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.profile-block {
+  margin-top: 1.25rem;
+}
+
+.profile-block-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.profile-block h3,
+.char-group h4 {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.char-group {
+  margin-top: 1rem;
+}
+
+.char-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-top: 0.5rem;
+}
+
+.char-card {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.char-card.is-playing {
+  border-color: color-mix(in oklab, var(--accent) 55%, var(--border));
+}
+
+.char-card.grave {
+  opacity: 0.85;
+}
+
+.char-card-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 12rem;
+}
+
+.char-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.playing-tag {
+  display: inline-block;
+  margin-top: 0.25rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.danger-text {
+  color: var(--danger) !important;
+}
+
+button.primary.compact {
+  width: auto;
+  margin-top: 0;
+  min-height: 36px;
+  padding: 0.4rem 0.85rem;
+}
