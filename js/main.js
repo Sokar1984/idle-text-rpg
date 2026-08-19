@@ -1,5 +1,11 @@
 import { loadData } from './data.js';
-import { createCharacter, getCharacter, saveCharacter, resetCharacter } from './character.js';
+import {
+  createCharacter,
+  getCharacter,
+  saveCharacter,
+  resetCharacter,
+  allocateTraining
+} from './character.js';
 import {
   advanceTime,
   catchUp,
@@ -55,6 +61,13 @@ function handlers() {
       const char = getCharacter();
       if (!char) return;
       const updated = completeBoardEvent(char, data, instanceId);
+      saveCharacter(updated);
+      redraw(updated);
+    },
+    onTrain: (skillId) => {
+      const char = getCharacter();
+      if (!char) return;
+      const updated = allocateTraining(char, skillId, data.skills);
       saveCharacter(updated);
       redraw(updated);
     }
