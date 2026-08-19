@@ -9,17 +9,22 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/board.css" />
+  <link rel="stylesheet" href="css/profile.css" />
 </head>
 <body>
   <div id="app">
     <header>
       <h1>Idle Text RPG</h1>
-      <p class="subtitle">v0.2 — races, portraits, home / village / wilderness</p>
+      <p class="subtitle">v0.2 — profile, characters, graveyard</p>
+      <div id="shell-nav" class="shell-nav"></div>
     </header>
 
     <main>
-      <section id="creation" class="panel">
-        <h2>Create your character</h2>
+      <section id="creation" class="panel hidden">
+        <div class="profile-header" style="margin-bottom:1rem">
+          <h2>Create your character</h2>
+          <button type="button" id="btn-cancel-create" class="ghost compact">Cancel</button>
+        </div>
         <p class="lede">They will live on their own. You check in, read the log, and decide what to become.</p>
 
         <div class="form-group">
@@ -54,13 +59,16 @@
         <button id="btn-create" class="primary">Begin journey</button>
       </section>
 
+      <section id="profile" class="hidden"></section>
+      <section id="graveyard" class="hidden"></section>
+
       <section id="game" class="hidden">
         <div class="panel top-card">
           <div class="top-bar">
             <div id="char-summary"></div>
             <div class="actions">
               <button id="btn-tick" class="secondary">Walk on</button>
-              <button id="btn-reset" class="ghost">Reset</button>
+              <button id="btn-profile" class="ghost">Profile</button>
             </div>
           </div>
           <div id="meters"></div>
