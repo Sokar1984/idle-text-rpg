@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "0.2.0",
   "tick_interval_seconds": 60,
   "offline_progress": true,
   "target_hours_to_level_10": 24,
@@ -17,5 +17,19 @@
   "base_xp_per_tick": 1.2,
   "combat_xp_multiplier": 3.5,
   "discovery_xp_multiplier": 2.0,
-  "notes": "XP values are cumulative totals required to reach that level. Tuned so a reasonably active idle character can reach level 10 in roughly 24 real hours."
+  "game_hours_per_tick": 2,
+  "starting_age_years": 13,
+  "hours_per_day": 24,
+  "days_per_year": 365,
+  "travel_hours": {
+    "wilderness": 3,
+    "village": 2,
+    "home": 2
+  },
+  "inventory_base_slots": 8,
+  "inventory_strength_factor": 1,
+  "inventory_vitality_factor": 0.5,
+  "rest_heal_percent": 0.35,
+  "rest_hours": 8,
+  "notes": "Game time is fictional. ~5 in-game years from age 13 toward adulthood near level 10. Real-world tick rate is separate."
 }
