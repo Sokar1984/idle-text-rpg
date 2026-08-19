@@ -1,5 +1,65 @@
 const STORAGE_KEY = 'idle-text-rpg-character';
-const SAVE_VERSION = 2;
+const SAVE_VERSION = 3;
+
+export function inventoryCapacity(char, config) {
+  const base = config.inventory_base_slots ?? 8;
+  const str = char.stats.strength || 0;
+  const vit = char.stats.vitality || 0;
+  return Math.max(
+    4,
+    Math.floor(
+      base +
+        str * (config.inventory_strength_factor ?? 1) +
+        vit * (config.inventory_vitality_factor ?? 0.5)
+    )
+  );
+}
+
+export function inventoryUsed(char) {
+  return (char.inventory || []).length;
+}
+
+export function canCarry(char, config, extra = 1) {
+  return inventoryUsed(char) + extra <= inventoryCapacity(char, config);
+}
+
+export function formatCoins(copper, currency) {
+  const cps = currency?.copper_per_silver ?? 100;
+  const spg = currency?.silver_per_gold ?? 100;
+  const gold = Math.floor(copper / (cps * spg));
+  const rem = copper % (cps * spg);
+  const silver = Math.floor(rem / cps);
+  const c = rem % cps;
+  const parts = [];
+  if (gold) parts.push(`${gold}g`);
+  if (silver) parts.push(`${silver}s`);
+  if (c || !parts.length) parts.push(`${c}c`);
+  return parts.join(' ');
+}
+
+export function gameAgeYears(char, config) {
+  const start = config.starting_age_years ?? 13;
+  const hpy = (config.hours_per_day ?? 24) * (config.days_per_year ?? 365);
+  return start + (char.gameHours || 0) / hpy;
+}
+
+export function formatGameTime(char, config) {
+  const hours = Math.floor(char.gameHours || 0);
+  const hpd = config.hours_per_day ?? 24;
+  const dpy = config.days_per_year ?? 365;
+  const totalDays = Math.floor(hours / hpd);
+  const year = Math.floor(totalDays / dpy);
+  const dayOfYear = (totalDays % dpy) + 1;
+  const hourOfDay = hours % hpd;
+  const age = gameAgeYears(char, config);
+  return {
+    year,
+    dayOfYear,
+    hourOfDay,
+    ageYears: age,
+    ageLabel: age.toFixed(1)
+  };
+}
 
 export function createCharacter({ name, classId, raceId, gender, avatarStyle }, classes, races) {
   const cls = classes.find(c => c.id === classId);
@@ -17,11 +77,9 @@ export function createCharacter({ name, classId, raceId, gender, avatarStyle }, 
     vitality: cls.starting_stats.vitality + (race.bonuses.vitality || 0),
     charisma: (cls.starting_stats.charisma || 4) + (race.bonuses.charisma || 0)
   };
-
-  // Floor at 1 so nothing goes negative
   Object.keys(stats).forEach(k => { stats[k] = Math.max(1, stats[k]); });
 
-  const maxHp = 20 + stats.vitality * 3;
+  const maxHp = 20 + stats.vitality * 4;
 
   return {
     version: SAVE_VERSION,
@@ -40,12 +98,17 @@ export function createCharacter({ name, classId, raceId, gender, avatarStyle }, 
     growth: { ...cls.stat_growth, charisma: cls.stat_growth.charisma ?? 1.0 },
     hp: maxHp,
     maxHp,
+    zone: 'home',
+    sublocation: 'bedroom',
     locationId: 'loc_meadow_01',
     inventory: [],
+    copper: 0,
+    storage: [],
+    gameHours: 0,
     log: [{
       time: now,
       type: 'system',
-      text: `${trimmed} the ${race.name} ${cls.name} steps into the world.`
+      text: `${trimmed} the ${race.name} ${cls.name} awakens at home, age 13, in the year 0.`
     }],
     createdAt: now,
     lastTick: now,
@@ -57,6 +120,7 @@ function migrate(raw) {
   const next = { ...raw };
   if (!next.version) next.version = SAVE_VERSION;
   if (!Array.isArray(next.inventory)) next.inventory = [];
+  if (!Array.isArray(next.storage)) next.storage = [];
   if (!Array.isArray(next.log)) next.log = [];
   if (!next.stats) {
     next.stats = { strength: 5, agility: 5, intelligence: 5, vitality: 5, charisma: 5 };
@@ -66,6 +130,14 @@ function migrate(raw) {
   if (!next.raceName) next.raceName = 'Human';
   if (!next.gender) next.gender = 'male';
   if (!next.avatarStyle) next.avatarStyle = 'neutral';
+  if (!next.zone) next.zone = 'wilderness';
+  if (next.sublocation === undefined) next.sublocation = null;
+  if (next.copper == null) next.copper = 0;
+  if (next.gameHours == null) next.gameHours = 0;
+  if (next.maxHp && next.stats?.vitality) {
+    // keep existing
+  }
+  next.version = SAVE_VERSION;
   return next;
 }
 
@@ -83,7 +155,7 @@ export function saveCharacter(char) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(char));
   } catch {
-    // private mode / quota
+    /* ignore */
   }
 }
 
@@ -105,7 +177,8 @@ export function addXp(char, amount, config) {
     char.level += 1;
     char.unspentSkillPoints += 2;
     char.maxHp += 6 + Math.floor(char.stats.vitality * 0.5);
-    char.hp = char.maxHp;
+    // Level-up does not auto-heal fully while wounded in the field
+    char.hp = Math.min(char.maxHp, char.hp + Math.round(char.maxHp * 0.2));
 
     char.log.unshift({
       time: Date.now(),
@@ -132,8 +205,8 @@ export function allocateSkill(char, stat) {
   char.unspentSkillPoints -= 1;
 
   if (stat === 'vitality') {
-    char.maxHp += 3;
-    char.hp += 3;
+    char.maxHp += 4;
+    char.hp += 4;
   }
 
   return char;
