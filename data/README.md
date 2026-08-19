@@ -1,17 +1,22 @@
 # Data
 
-This folder contains the actual game content and configuration.
-
-## Files
-
 | File | Purpose |
 |------|--------|
-| `config.json` | Core timing, XP curve, and balance settings (tuned for ~24h to level 10) |
-| `classes.json` | Playable classes, starting stats, and growth rates |
-| `locations.json` | Location templates (levels 1–10) |
-| `monsters.json` | Monster / encounter templates (levels 1–10) |
-| `events.json` | Event templates (levels 1–10) |
+| `config.json` | Tick rate, XP curve (~24h to level 10) |
+| `classes.json` | Classes, starting stats (includes charisma), growth |
+| `races.json` | Races, stat bonuses, advantages/disadvantages, gendered name lists |
+| `locations.json` | Places |
+| `monsters.json` | Encounters |
+| `events.json` | What can happen |
 
-All content templates follow the schemas defined in `/schemas`.
+## Character creation inputs
 
-AIs generating new content should add it here while respecting the existing structure and level ranges.
+- **Race** — human, orc, high-elf, dark-elf, demon, dwarf
+- **Gender** — male / female (drives name list + avatar)
+- **Avatar style** — neutral / beautiful / ugly
+- **Name** — auto-suggested from race+gender list, editable, rerollable
+- **Class** — warrior, ranger, mage, rogue
+
+Final stats = class starting stats + race bonuses (floored at 1).
+
+Portrait files live in `/avatars` as `{race}-{gender}-{style}.webp`.
