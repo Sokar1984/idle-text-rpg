@@ -1,0 +1,124 @@
+{
+  "events": [
+    {
+      "id": "evt_travel_01",
+      "name": "Quiet Travel",
+      "level_range": [1, 10],
+      "tags": ["travel", "peaceful"],
+      "description": "You travel for a time without incident. The road (or path) stretches on.",
+      "possible_outcomes": [
+        { "type": "xp", "chance": 1.0, "effect": "small_xp" }
+      ]
+    },
+    {
+      "id": "evt_wildlife_01",
+      "name": "Wildlife Encounter",
+      "level_range": [1, 6],
+      "tags": ["wildlife", "wilderness"],
+      "description": "You spot animals in the distance. Most keep their distance.",
+      "possible_outcomes": [
+        { "type": "xp", "chance": 0.7, "effect": "small_xp" },
+        { "type": "combat", "chance": 0.3, "effect": "low_danger_combat" }
+      ]
+    },
+    {
+      "id": "evt_ambush_01",
+      "name": "Sudden Ambush",
+      "level_range": [1, 8],
+      "tags": ["combat", "ambush"],
+      "description": "Something moves too quickly. You are under attack before you can fully react.",
+      "possible_outcomes": [
+        { "type": "combat", "chance": 1.0, "effect": "standard_combat" }
+      ]
+    },
+    {
+      "id": "evt_discovery_01",
+      "name": "Hidden Cache",
+      "level_range": [1, 7],
+      "tags": ["discovery", "loot"],
+      "description": "You notice something unusual — a loose stone, a buried box, or a forgotten pack.",
+      "possible_outcomes": [
+        { "type": "loot", "chance": 0.75, "effect": "minor_loot" },
+        { "type": "trap", "chance": 0.25, "effect": "minor_damage" }
+      ]
+    },
+    {
+      "id": "evt_merchant_01",
+      "name": "Traveling Merchant",
+      "level_range": [2, 9],
+      "tags": ["social", "merchant", "opportunity"],
+      "description": "A merchant with a heavily loaded mule greets you and offers to trade.",
+      "possible_outcomes": [
+        { "type": "shop", "chance": 0.8, "effect": "open_shop" },
+        { "type": "nothing", "chance": 0.2, "effect": "merchant_leaves" }
+      ]
+    },
+    {
+      "id": "evt_strange_01",
+      "name": "Strange Occurrence",
+      "level_range": [3, 10],
+      "tags": ["strange_occurrence", "magical", "mystery"],
+      "description": "Something feels wrong — or at least unusual. The air shifts. A sound doesn’t belong.",
+      "possible_outcomes": [
+        { "type": "lore", "chance": 0.4, "effect": "gain_knowledge" },
+        { "type": "combat", "chance": 0.3, "effect": "strange_combat" },
+        { "type": "blessing", "chance": 0.3, "effect": "temporary_buff" }
+      ]
+    },
+    {
+      "id": "evt_lore_01",
+      "name": "Old Inscription",
+      "level_range": [3, 10],
+      "tags": ["lore", "discovery", "ruins"],
+      "description": "You find writing or carvings left by someone long gone. Time has worn them, but meaning remains.",
+      "possible_outcomes": [
+        { "type": "lore", "chance": 0.9, "effect": "gain_knowledge" },
+        { "type": "xp", "chance": 0.1, "effect": "medium_xp" }
+      ]
+    },
+    {
+      "id": "evt_rest_01",
+      "name": "Safe Rest",
+      "level_range": [1, 10],
+      "tags": ["peaceful", "recovery"],
+      "description": "You find a sheltered spot and manage a proper rest.",
+      "possible_outcomes": [
+        { "type": "heal", "chance": 1.0, "effect": "recover_health" }
+      ]
+    },
+    {
+      "id": "evt_misfortune_01",
+      "name": "Bad Footing",
+      "level_range": [1, 8],
+      "tags": ["misfortune"],
+      "description": "The ground gives way slightly, or a branch snaps at the wrong moment. Minor trouble.",
+      "possible_outcomes": [
+        { "type": "damage", "chance": 0.7, "effect": "minor_damage" },
+        { "type": "nothing", "chance": 0.3, "effect": "narrow_escape" }
+      ]
+    },
+    {
+      "id": "evt_opportunity_01",
+      "name": "Unexpected Opportunity",
+      "level_range": [4, 10],
+      "tags": ["opportunity", "social", "loot"],
+      "description": "A chance presents itself — information, a temporary alliance, or a valuable item left unattended.",
+      "possible_outcomes": [
+        { "type": "loot", "chance": 0.4, "effect": "medium_loot" },
+        { "type": "buff", "chance": 0.3, "effect": "temporary_buff" },
+        { "type": "xp", "chance": 0.3, "effect": "medium_xp" }
+      ]
+    },
+    {
+      "id": "evt_elite_01",
+      "name": "Dangerous Presence",
+      "level_range": [7, 10],
+      "tags": ["combat", "dangerous", "elite"],
+      "description": "You feel it before you see it. Something strong is nearby, and it has noticed you.",
+      "possible_outcomes": [
+        { "type": "combat", "chance": 0.85, "effect": "elite_combat" },
+        { "type": "escape", "chance": 0.15, "effect": "successful_retreat" }
+      ]
+    }
+  ]
+}
