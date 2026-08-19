@@ -15,7 +15,7 @@ import {
   moveToStorage,
   completeBoardEvent
 } from './engine.js';
-import { renderCreation, renderGame } from './ui.js';
+import { renderCreation, renderGame, refreshMeters } from './ui.js';
 
 let data = null;
 
@@ -125,7 +125,7 @@ function applyDueTicks() {
   if (!char) return;
   const { character, ticks } = catchUp(char, data);
   if (ticks <= 0) {
-    redraw(char);
+    refreshMeters(char, data);
     return;
   }
   saveCharacter(character);
@@ -157,4 +157,7 @@ function onReset() {
   location.reload();
 }
 
-init();
+if (!window.__idleRpgStarted) {
+  window.__idleRpgStarted = true;
+  init();
+}

@@ -406,11 +406,6 @@ export function moveToStorage(char, data) {
 const MAX_OFFLINE_TICKS = 1440;
 
 export function catchUp(char, data) {
-  if (char.zone !== 'wilderness') {
-    char.lastTick = Date.now();
-    return { character: char, ticks: 0 };
-  }
-
   const intervalMs = (data.config.tick_interval_seconds || 60) * 1000;
   const elapsed = Date.now() - char.lastTick;
   const ticks = Math.min(Math.floor(elapsed / intervalMs), MAX_OFFLINE_TICKS);
@@ -420,10 +415,11 @@ export function catchUp(char, data) {
 
   if (ticks >= 10) {
     const gameHours = ticks * (data.config.game_hours_per_tick ?? 2);
+    const where = char.zone === 'wilderness' ? 'wild' : char.zone;
     pushLog(
       char,
       'system',
-      `You return to yourself. About ${gameHours} hours of wild time have passed.`
+      `You return to yourself. About ${gameHours} hours of ${where} time have passed.`
     );
   }
 

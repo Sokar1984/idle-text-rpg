@@ -62,6 +62,26 @@ function hoursLeft(evt, char) {
   return Math.max(0, Math.ceil((evt.expiresAtHour || 0) - (char.gameHours || 0)));
 }
 
+export function refreshMeters(char, data) {
+  const el = document.getElementById('meters');
+  if (!el) return;
+  const hpPct = Math.max(0, Math.min(100, (char.hp / char.maxHp) * 100));
+  const remainMs = msUntilNextTick(char, data);
+  const seconds = Math.max(1, Math.ceil(remainMs / 1000));
+  const intervalMs = (data.config.tick_interval_seconds || 60) * 1000;
+  const beatPct = Math.max(0, Math.min(100, (1 - remainMs / intervalMs) * 100));
+  el.innerHTML = `
+    <div class="meter">
+      <div class="meter-label"><span>Health</span><span>${char.hp} / ${char.maxHp}</span></div>
+      <div class="meter-track"><div class="meter-fill hp" style="width:${hpPct}%"></div></div>
+    </div>
+    <div class="meter">
+      <div class="meter-label"><span>Next beat</span><span>${seconds}s</span></div>
+      <div class="meter-track thin"><div class="meter-fill beat" style="width:${beatPct}%"></div></div>
+    </div>
+  `;
+}
+
 export function renderCreation(data, onCreate) {
   const races = data.races;
   const classes = data.classes;
@@ -211,22 +231,7 @@ export function renderGame(char, data, handlers = {}) {
     · Purse ${coins}
   `;
 
-  const hpPct = Math.max(0, Math.min(100, (char.hp / char.maxHp) * 100));
-  const remainMs = msUntilNextTick(char, data);
-  const seconds = Math.max(1, Math.ceil(remainMs / 1000));
-  const intervalMs = (data.config.tick_interval_seconds || 60) * 1000;
-  const beatPct = Math.max(0, Math.min(100, (1 - remainMs / intervalMs) * 100));
-
-  document.getElementById('meters').innerHTML = `
-    <div class="meter">
-      <div class="meter-label"><span>Health</span><span>${char.hp} / ${char.maxHp}</span></div>
-      <div class="meter-track"><div class="meter-fill hp" style="width:${hpPct}%"></div></div>
-    </div>
-    <div class="meter">
-      <div class="meter-label"><span>Next beat</span><span>${seconds}s</span></div>
-      <div class="meter-track thin"><div class="meter-fill beat" style="width:${beatPct}%"></div></div>
-    </div>
-  `;
+  refreshMeters(char, data);
 
   const zoneNav = document.getElementById('zone-nav');
   zoneNav.innerHTML = `
