@@ -2,7 +2,7 @@
 
 A text-based idle RPG. You create a character. The character lives on its own. You check in, read the log, spend skill points, and leave again.
 
-Play it here: **https://sokar1984.github.io/idle-text-rpg/**
+Play it here: **https://sokar1984.github.io/**
 
 Or open `index.html` locally. Progress is stored in `localStorage`.
 
