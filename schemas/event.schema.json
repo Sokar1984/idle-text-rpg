@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Event Template",
+  "type": "object",
+  "required": ["id", "name", "level_range", "tags", "description"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier, e.g. evt_discovery_07"
+    },
+    "name": {
+      "type": "string"
+    },
+    "level_range": {
+      "type": "array",
+      "items": { "type": "integer" },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "e.g. discovery, combat, social, misfortune, opportunity"
+    },
+    "description": {
+      "type": "string",
+      "description": "What the player reads when this event occurs"
+    },
+    "possible_outcomes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "chance"],
+        "properties": {
+          "type": { "type": "string" },
+          "chance": { "type": "number", "minimum": 0, "maximum": 1 },
+          "effect": { "type": "string" }
+        }
+      }
+    }
+  }
+}
