@@ -1,4 +1,10 @@
-const STORAGE_KEY = 'idle-text-rpg-character';
+import {
+  loadProfile,
+  getActiveCharacter,
+  upsertActiveCharacter,
+  deleteCharacter as profileDeleteCharacter
+} from './profile.js';
+
 const SAVE_VERSION = 5;
 
 const DEFAULT_EQUIPMENT = {
@@ -82,13 +88,11 @@ export function formatGameTime(char, config) {
   };
 }
 
-/** Percent gained when spending one training point on a skill. */
 export function trainingGainFor(skillId, char, skillsData) {
   const def = (skillsData || []).find(s => s.id === skillId);
   const stats = char.stats || {};
   const keys = def?.primary_stats || ['strength'];
   const avg = keys.reduce((sum, k) => sum + (stats[k] || 1), 0) / keys.length;
-  // ~2–6% per point: even many levels cannot max every skill
   const gain = 1.8 + avg / 8;
   return Math.max(1.5, Math.min(6.5, Math.round(gain * 10) / 10));
 }
@@ -124,6 +128,7 @@ export function createCharacter({ name, classId, raceId, gender, avatarStyle }, 
 
   return {
     version: SAVE_VERSION,
+    id: `c_${now.toString(36)}_${Math.random().toString(36).slice(2, 8)}`,
     name: trimmed,
     classId: cls.id,
     className: cls.name,
@@ -144,6 +149,8 @@ export function createCharacter({ name, classId, raceId, gender, avatarStyle }, 
     maxHp,
     zone: 'home',
     sublocation: 'bedroom',
+    wildernessActive: false,
+    status: 'alive',
     locationId: 'loc_meadow_01',
     inventory: [],
     copper: 0,
@@ -163,6 +170,7 @@ export function createCharacter({ name, classId, raceId, gender, avatarStyle }, 
 }
 
 function migrate(raw) {
+  if (!raw) return null;
   const next = { ...raw };
   if (!Array.isArray(next.inventory)) next.inventory = [];
   if (!Array.isArray(next.storage)) next.storage = [];
@@ -190,33 +198,27 @@ function migrate(raw) {
     if (next.equipment[k] === undefined) next.equipment[k] = null;
   }
   if (next.trainingPoints == null) next.trainingPoints = 0;
+  if (next.wildernessActive == null) next.wildernessActive = next.zone === 'wilderness';
+  if (!next.status) next.status = 'alive';
+  if (!next.id) next.id = `c_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
   next.version = SAVE_VERSION;
   return next;
 }
 
 export function getCharacter() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    return migrate(JSON.parse(raw));
-  } catch {
-    return null;
-  }
+  const char = getActiveCharacter(loadProfile());
+  return migrate(char);
 }
 
 export function saveCharacter(char) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(char));
-  } catch {
-    /* ignore */
-  }
+  if (!char) return;
+  upsertActiveCharacter(migrate(char));
 }
 
 export function resetCharacter() {
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-  } catch {
-    /* ignore */
+  const profile = loadProfile();
+  if (profile.activeCharacterId) {
+    profileDeleteCharacter(profile.activeCharacterId, profile);
   }
 }
 
@@ -265,7 +267,6 @@ export function allocateSkill(char, stat) {
   return char;
 }
 
-/** Spend one training point into a 0–100 skill. */
 export function allocateTraining(char, skillId, skillsData) {
   if ((char.trainingPoints || 0) <= 0) return char;
   if (!char.skills) char.skills = { ...DEFAULT_SKILLS };
