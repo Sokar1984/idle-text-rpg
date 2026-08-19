@@ -1,0 +1,124 @@
+{
+  "locations": [
+    {
+      "id": "loc_meadow_01",
+      "name": "Sunlit Meadow",
+      "level_range": [1, 3],
+      "tags": ["wilderness", "peaceful", "open"],
+      "description": "A wide meadow filled with tall grass and wildflowers. The air is warm and quiet.",
+      "possible_events": ["travel", "discovery", "wildlife"],
+      "danger": 1,
+      "resources": ["herbs", "game"]
+    },
+    {
+      "id": "loc_forest_edge_01",
+      "name": "Forest Edge",
+      "level_range": [1, 4],
+      "tags": ["forest", "wilderness"],
+      "description": "The trees grow denser here. Birdsong mixes with the occasional snap of a twig.",
+      "possible_events": ["ambush", "discovery", "travel"],
+      "danger": 2,
+      "resources": ["wood", "herbs", "game"]
+    },
+    {
+      "id": "loc_old_road_01",
+      "name": "Old Trade Road",
+      "level_range": [1, 5],
+      "tags": ["road", "travel", "civilized"],
+      "description": "A packed-dirt road that has seen better days. Wagon ruts are still visible.",
+      "possible_events": ["travel", "merchant", "ambush", "social"],
+      "danger": 2,
+      "resources": []
+    },
+    {
+      "id": "loc_pine_thicket_01",
+      "name": "Whispering Pine Thicket",
+      "level_range": [2, 5],
+      "tags": ["forest", "wilderness", "eerie"],
+      "description": "Tall pines stand close together. The wind through the needles sounds almost like voices.",
+      "possible_events": ["ambush", "discovery", "strange_occurrence"],
+      "danger": 3,
+      "resources": ["wood", "herbs"]
+    },
+    {
+      "id": "loc_ruined_farm_01",
+      "name": "Abandoned Farmstead",
+      "level_range": [2, 6],
+      "tags": ["ruins", "rural", "melancholy"],
+      "description": "Collapsed fences and a half-burned farmhouse. Nature is reclaiming the place.",
+      "possible_events": ["discovery", "ambush", "lore"],
+      "danger": 3,
+      "resources": ["scrap", "herbs"]
+    },
+    {
+      "id": "loc_misty_hollow_01",
+      "name": "Misty Hollow",
+      "level_range": [3, 7],
+      "tags": ["forest", "magical", "dangerous"],
+      "description": "A low-lying hollow where mist never fully clears. Strange lights sometimes flicker between the trees.",
+      "possible_events": ["strange_occurrence", "ambush", "discovery", "magical"],
+      "danger": 5,
+      "resources": ["herbs", "rare_herbs"]
+    },
+    {
+      "id": "loc_stone_circle_01",
+      "name": "Ancient Stone Circle",
+      "level_range": [4, 8],
+      "tags": ["ruins", "magical", "holy"],
+      "description": "Weathered standing stones arranged in a rough circle. Faint carvings are still visible on some faces.",
+      "possible_events": ["discovery", "lore", "magical", "strange_occurrence"],
+      "danger": 4,
+      "resources": []
+    },
+    {
+      "id": "loc_river_crossing_01",
+      "name": "Shallow River Crossing",
+      "level_range": [3, 7],
+      "tags": ["water", "travel", "wilderness"],
+      "description": "A broad, shallow stretch of river where the water runs clear over smooth stones.",
+      "possible_events": ["travel", "wildlife", "discovery", "ambush"],
+      "danger": 3,
+      "resources": ["fish", "water"]
+    },
+    {
+      "id": "loc_bandit_camp_01",
+      "name": "Hidden Bandit Camp",
+      "level_range": [5, 9],
+      "tags": ["dangerous", "humanoid", "camp"],
+      "description": "A rough camp tucked between rocks. Smoke rises from a poorly hidden fire.",
+      "possible_events": ["ambush", "combat", "discovery", "social"],
+      "danger": 7,
+      "resources": ["scrap", "coins"]
+    },
+    {
+      "id": "loc_deep_woods_01",
+      "name": "Deep Woods",
+      "level_range": [6, 10],
+      "tags": ["forest", "wilderness", "dangerous"],
+      "description": "The canopy is so thick that little sunlight reaches the ground. The silence feels deliberate.",
+      "possible_events": ["ambush", "strange_occurrence", "discovery", "wildlife"],
+      "danger": 8,
+      "resources": ["wood", "rare_herbs", "game"]
+    },
+    {
+      "id": "loc_crumbling_tower_01",
+      "name": "Crumbling Watchtower",
+      "level_range": [6, 10],
+      "tags": ["ruins", "elevated", "dangerous"],
+      "description": "A stone tower leaning heavily to one side. The upper floors have long since collapsed.",
+      "possible_events": ["discovery", "ambush", "lore", "combat"],
+      "danger": 7,
+      "resources": ["scrap", "stone"]
+    },
+    {
+      "id": "loc_sunken_path_01",
+      "name": "Sunken Path",
+      "level_range": [7, 10],
+      "tags": ["ruins", "underground", "eerie"],
+      "description": "An old path that has sunk several feet below the surrounding ground. Roots and stone press in from both sides.",
+      "possible_events": ["ambush", "discovery", "strange_occurrence", "lore"],
+      "danger": 8,
+      "resources": ["scrap"]
+    }
+  ]
+}
