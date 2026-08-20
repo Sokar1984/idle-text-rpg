@@ -19,7 +19,8 @@ import {
   restAtHome,
   sellAllAtVendor,
   moveToStorage,
-  completeBoardEvent
+  completeBoardEvent,
+  acceptClassQuest
 } from './engine.js';
 import { renderCreation, renderGame, refreshMeters } from './ui.js';
 import {
@@ -29,7 +30,7 @@ import {
 } from './profile-ui.js';
 
 let data = null;
-let screen = 'game'; // game | profile | graveyard | creation
+let screen = 'game';
 
 function profileHandlers() {
   return {
@@ -53,7 +54,6 @@ function profileHandlers() {
         navigate(canAddCharacter() ? 'creation' : 'profile');
         return;
       }
-      // Stay on profile; shell updates
       paintShell();
     },
     onProfileChanged: () => paintShell()
@@ -65,7 +65,11 @@ function handlers() {
     onTravel: (zone) => {
       const char = getCharacter();
       if (!char) return;
-      const sub = zone === 'home' ? 'bedroom' : zone === 'village' ? 'vendor' : null;
+      let sub = null;
+      if (zone === 'home') sub = 'bedroom';
+      else if (zone === 'village') {
+        sub = char.settledInMainCity ? 'vendor' : 'bedroom';
+      }
       if (zone === 'wilderness') char.wildernessActive = true;
       const updated = travelTo(char, data, zone, sub);
       saveCharacter(updated);
@@ -103,6 +107,13 @@ function handlers() {
       const char = getCharacter();
       if (!char) return;
       const updated = completeBoardEvent(char, data, instanceId);
+      saveCharacter(updated);
+      redraw(updated);
+    },
+    onAcceptQuest: (questId) => {
+      const char = getCharacter();
+      if (!char) return;
+      const updated = acceptClassQuest(char, data, questId);
       saveCharacter(updated);
       redraw(updated);
     },
@@ -166,7 +177,6 @@ async function init() {
   data = await loadData();
   window.gameData = data;
 
-  // Ensure a local signed-in profile exists
   signInLocal('Wanderer');
 
   const profile = loadProfile();
@@ -196,7 +206,7 @@ async function init() {
 }
 
 function onCreate(opts) {
-  const char = createCharacter(opts, data.classes, data.races);
+  const char = createCharacter(opts, data.classes, data.races, data.raceStarts);
   const { profile, error } = addCharacterToProfile(char);
   if (error) {
     alert(error);
