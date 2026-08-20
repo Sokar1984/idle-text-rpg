@@ -5,7 +5,7 @@ import {
   deleteCharacter as profileDeleteCharacter
 } from './profile.js';
 
-const SAVE_VERSION = 5;
+const SAVE_VERSION = 6;
 
 const DEFAULT_EQUIPMENT = {
   head: null,
@@ -106,7 +106,8 @@ export function skillDisplayName(skillId, classId, skillsData) {
   return def.name;
 }
 
-export function createCharacter({ name, classId, raceId, gender, avatarStyle }, classes, races) {
+/** @param raceStarts optional map from data/race-starts.json */
+export function createCharacter({ name, classId, raceId, gender, avatarStyle }, classes, races, raceStarts = null) {
   const cls = classes.find(c => c.id === classId);
   const race = races.find(r => r.id === raceId);
   if (!cls) throw new Error('Unknown class');
@@ -114,6 +115,10 @@ export function createCharacter({ name, classId, raceId, gender, avatarStyle }, 
 
   const now = Date.now();
   const trimmed = (name || '').trim() || 'Wanderer';
+  const start = raceStarts?.[race.id] || null;
+  const locationId = start?.wilderness_id || 'loc_meadow_01';
+  const homeLabel = start?.home_label || 'home';
+  const villageName = start?.village_name || 'the village';
 
   const stats = {
     strength: cls.starting_stats.strength + (race.bonuses.strength || 0),
@@ -151,7 +156,11 @@ export function createCharacter({ name, classId, raceId, gender, avatarStyle }, 
     sublocation: 'bedroom',
     wildernessActive: false,
     status: 'alive',
-    locationId: 'loc_meadow_01',
+    locationId,
+    settledInMainCity: false,
+    racialVillageName: villageName,
+    homeLabel,
+    classQuestState: null,
     inventory: [],
     copper: 0,
     storage: [],
@@ -161,7 +170,7 @@ export function createCharacter({ name, classId, raceId, gender, avatarStyle }, 
     log: [{
       time: now,
       type: 'system',
-      text: `${trimmed} the ${race.name} ${cls.name} awakens at home, age 13, in the year 0.`
+      text: `${trimmed} the ${race.name} ${cls.name} awakens in ${homeLabel}, age 13, in the year 0. Beyond lies ${start?.wilderness_name || 'the wild'}.`
     }],
     createdAt: now,
     lastTick: now,
@@ -201,6 +210,10 @@ function migrate(raw) {
   if (next.wildernessActive == null) next.wildernessActive = next.zone === 'wilderness';
   if (!next.status) next.status = 'alive';
   if (!next.id) next.id = `c_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+  if (next.settledInMainCity == null) next.settledInMainCity = false;
+  if (next.classQuestState === undefined) next.classQuestState = null;
+  if (!next.homeLabel) next.homeLabel = 'home';
+  if (!next.racialVillageName) next.racialVillageName = 'the village';
   next.version = SAVE_VERSION;
   return next;
 }
@@ -230,7 +243,6 @@ export function addXp(char, amount, config) {
     if (needed == null || char.xp < needed) break;
 
     char.level += 1;
-    // Points still accumulate — hidden from the player UI
     char.unspentSkillPoints += 2;
     char.trainingPoints = (char.trainingPoints || 0) + 1;
     char.maxHp += 6 + Math.floor(char.stats.vitality * 0.5);
@@ -256,15 +268,12 @@ export function addXp(char, amount, config) {
 export function allocateSkill(char, stat) {
   if (char.unspentSkillPoints <= 0) return char;
   if (char.stats[stat] == null) return char;
-
   char.stats[stat] += 1;
   char.unspentSkillPoints -= 1;
-
   if (stat === 'vitality') {
     char.maxHp += 4;
     char.hp += 4;
   }
-
   return char;
 }
 
@@ -273,7 +282,6 @@ export function allocateTraining(char, skillId, skillsData) {
   if (!char.skills) char.skills = { ...DEFAULT_SKILLS };
   if (char.skills[skillId] == null) return char;
   if (char.skills[skillId] >= 100) return char;
-
   const gain = trainingGainFor(skillId, char, skillsData);
   char.skills[skillId] = Math.min(100, Math.round((char.skills[skillId] + gain) * 10) / 10);
   char.trainingPoints -= 1;
