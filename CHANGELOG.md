@@ -15,6 +15,8 @@ Living log for humans and AIs. Newest first. Read this before extending systems.
 - After accepting the class quest and arriving fully healed, character does not sit idle — leaves for the wilds on the same beat
 - Rest-at-home path also triggers auto-leave when condition is Steady
 
+**Fix:** `js/engine.js` and `js/ui.js` were accidentally replaced with empty `file://` stubs on push. Restored from last good blobs and wired the accept UI so the loop actually runs.
+
 ## 2026-08-20 — Hidden stats (lived experience UI)
 
 **Design:** Attributes, skill %, training points, gear, and pack are **still simulated** but **not shown** on the player UI. Progress is felt through the adventure log, events, and quests — not a character sheet.
