@@ -1,1 +1,1 @@
-PLACEHOLDER
+file:///home/workdir/artifacts/js/ui.js

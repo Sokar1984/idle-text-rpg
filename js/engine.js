@@ -1,1 +1,1 @@
-RESTORE_FROM_LOCAL
+file:///home/workdir/artifacts/js/engine.js
