@@ -1,0 +1,46 @@
+{
+  "quests": {
+    "warrior": {
+      "id": "cq_warrior_road",
+      "name": "The Road to the Banner",
+      "description": "Word has come that Crossroads musters arms. A warrior of any blood is expected to present themselves — and to own at least the shape of a weapon.",
+      "level_required": 5
+    },
+    "ranger": {
+      "id": "cq_ranger_road",
+      "name": "Marks on the Map",
+      "description": "The scout lodges in Crossroads want ranges walked by someone who has slept under open sky. Bring what passes for a bow-hand's kit.",
+      "level_required": 5
+    },
+    "mage": {
+      "id": "cq_mage_road",
+      "name": "Ash on the Threshold",
+      "description": "The Lantern Archive accepts novices who can walk the long road without losing their focus. A staff — even a poor one — marks the claim.",
+      "level_required": 5
+    },
+    "rogue": {
+      "id": "cq_rogue_road",
+      "name": "Quiet Entry",
+      "description": "Crossroads has doors that do not open for loud footsteps. Someone has left a blade and a coat for a traveler willing to arrive unseen.",
+      "level_required": 5
+    }
+  },
+  "starter_gear": {
+    "warrior": {
+      "main_hand": { "id": "gear_rusty_sword", "name": "Rusty short sword", "slot": "main_hand", "quality": "shoddy" },
+      "chest": { "id": "gear_patched_gambeson", "name": "Patched gambeson", "slot": "chest", "quality": "shoddy" }
+    },
+    "ranger": {
+      "main_hand": { "id": "gear_warped_bow", "name": "Warped practice bow", "slot": "main_hand", "quality": "shoddy" },
+      "chest": { "id": "gear_travel_vest", "name": "Worn travel vest", "slot": "chest", "quality": "shoddy" }
+    },
+    "mage": {
+      "main_hand": { "id": "gear_knotted_staff", "name": "Knotted branch staff", "slot": "main_hand", "quality": "shoddy" },
+      "chest": { "id": "gear_frayed_robe", "name": "Frayed novice robe", "slot": "chest", "quality": "shoddy" }
+    },
+    "rogue": {
+      "main_hand": { "id": "gear_notched_knife", "name": "Notched belt knife", "slot": "main_hand", "quality": "shoddy" },
+      "chest": { "id": "gear_moth_cloak", "name": "Moth-eaten cloak", "slot": "chest", "quality": "shoddy" }
+    }
+  }
+}
