@@ -2,6 +2,19 @@
 
 Living log for humans and AIs. Newest first. Read this before extending systems.
 
+## 2026-08-21 — Class quest accept UI + auto-journey polish
+
+**Level-5 class quest → main city (end-to-end)**
+- Quests tab now shows full description for the class journey and a **Take the road** button
+- Accept grants shitty class weapon + chest (no stats), advances time on the road, sets home to Crossroads, unlocks the open world
+- Journey log names the place left behind and the arrival at the city gates
+- Quests tab gains a subtle action cue while a class journey is waiting; auto-surfaces once when offered
+
+**Auto-journey when full HP at home**
+- Already present in engine; confirmed and tightened
+- After accepting the class quest and arriving fully healed, character does not sit idle — leaves for the wilds on the same beat
+- Rest-at-home path also triggers auto-leave when condition is Steady
+
 ## 2026-08-20 — Hidden stats (lived experience UI)
 
 **Design:** Attributes, skill %, training points, gear, and pack are **still simulated** but **not shown** on the player UI. Progress is felt through the adventure log, events, and quests — not a character sheet.

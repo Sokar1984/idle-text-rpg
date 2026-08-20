@@ -25,6 +25,31 @@
   background: color-mix(in oklab, var(--accent) 12%, transparent);
 }
 
+.board-tab.has-action:not(.selected) {
+  border-color: color-mix(in oklab, var(--accent) 55%, var(--border));
+  color: var(--text);
+}
+
+.board-tab.has-action::after {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 0.35rem;
+  border-radius: 50%;
+  background: var(--accent);
+  vertical-align: middle;
+}
+
+.quest-card {
+  cursor: default;
+}
+
+.quest-card .quest-accept {
+  margin-top: 0.65rem;
+  width: 100%;
+}
+
 .board-list {
   display: flex;
   flex-direction: column;
