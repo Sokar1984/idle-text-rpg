@@ -175,11 +175,6 @@ button.ghost:hover { color: var(--text); }
   color: var(--text-dim);
   margin-right: 0.35rem;
 }
-.layout { display: grid; grid-template-columns: 260px 1fr; gap: 1rem; }
-@media (max-width: 720px) {
-  .layout { grid-template-columns: 1fr; }
-  .avatar-grid { grid-template-columns: repeat(3, 1fr); }
-}
 .sub-panel {
   background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
   padding: 1rem; margin-bottom: 1rem;
@@ -188,16 +183,11 @@ button.ghost:hover { color: var(--text); }
   font-size: 0.75rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em;
   color: var(--text-dim); margin-bottom: 0.75rem;
 }
-.stat-row, .pack-list li {
-  display: flex; justify-content: space-between; font-size: 0.9rem; padding: 0.25rem 0;
-  text-transform: capitalize;
-}
-.stat-row span:last-child, .pack-list li span:last-child {
-  color: var(--accent); font-variant-numeric: tabular-nums;
+.log-wide .log {
+  max-height: min(70vh, 720px);
 }
 .hint { font-size: 0.85rem; color: var(--text-dim); }
 .hint.accent { color: var(--accent); }
-.pack-list { list-style: none; }
 .log {
   max-height: 560px; overflow-y: auto; font-size: 0.9rem;
   display: flex; flex-direction: column; gap: 0.5rem;
@@ -212,12 +202,6 @@ button.ghost:hover { color: var(--text); }
 .log-entry .meta {
   font-size: 0.7rem; color: var(--text-dim); margin-bottom: 0.15rem; font-variant-numeric: tabular-nums;
 }
-.skill-points { margin-top: 0.75rem; display: flex; flex-direction: column; gap: 0.4rem; }
-.skill-points button {
-  width: 100%; display: flex; justify-content: space-between;
-  background: var(--bg); color: var(--text); border: 1px solid var(--border); font-size: 0.85rem;
-}
-.skill-points button:hover:not(:disabled) { border-color: var(--accent); }
 @media (prefers-reduced-motion: reduce) {
   button, .class-card { transition: none; }
 }
