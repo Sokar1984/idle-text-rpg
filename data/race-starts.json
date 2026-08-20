@@ -1,0 +1,58 @@
+{
+  "starts": {
+    "human": {
+      "wilderness_id": "loc_race_human_fields",
+      "wilderness_name": "Border Farmlands",
+      "wilderness_description": "Tilting fence-lines and half-worked fields. Humans farm the soft edges of the wild.",
+      "village_name": "Millcross Hamlet",
+      "home_label": "your family's cottage",
+      "journey_flavor": "dusty roads and shared wells"
+    },
+    "orc": {
+      "wilderness_id": "loc_race_orc_scar",
+      "wilderness_name": "Ashridge Scar",
+      "wilderness_description": "Burned ridges and bone-marked trails. The ground remembers old raids.",
+      "village_name": "Iron-Tusk Camp",
+      "home_label": "your hide tent",
+      "journey_flavor": "smoke, drums, and hard earth"
+    },
+    "high-elf": {
+      "wilderness_id": "loc_race_highelf_glade",
+      "wilderness_name": "Silverleaf Glade",
+      "wilderness_description": "Pale trees and quiet light. Paths seem to decide themselves.",
+      "village_name": "Lirien's Rest",
+      "home_label": "your leaf-roofed dwelling",
+      "journey_flavor": "whispering canopy and old songs"
+    },
+    "dark-elf": {
+      "wilderness_id": "loc_race_darkelf_gloom",
+      "wilderness_name": "Umbral Cut",
+      "wilderness_description": "A sunken track under blackstone shelves. Shadows keep their own counsel.",
+      "village_name": "Veilhollow",
+      "home_label": "your stone-cut room",
+      "journey_flavor": "low ceilings and watchful silence"
+    },
+    "demon": {
+      "wilderness_id": "loc_race_demon_rift",
+      "wilderness_name": "Cinder Rift",
+      "wilderness_description": "Warm cracks in the ground and air that tastes of metal. Nothing here is entirely natural.",
+      "village_name": "Emberhold",
+      "home_label": "your scorched alcove",
+      "journey_flavor": "heat shimmer and uneasy truces"
+    },
+    "dwarf": {
+      "wilderness_id": "loc_race_dwarf_delve",
+      "wilderness_name": "Stonegate Approaches",
+      "wilderness_description": "Quarry slopes and wind-bitten switchbacks leading toward the hold.",
+      "village_name": "Kharum Gate",
+      "home_label": "your stone berth",
+      "journey_flavor": "echoing halls and iron lamps"
+    }
+  },
+  "main_city": {
+    "id": "city_crossroads",
+    "name": "Crossroads",
+    "description": "The main city — markets, halls, and roads that lead everywhere else.",
+    "home_label": "your new quarters in Crossroads"
+  }
+}
