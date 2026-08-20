@@ -43,6 +43,31 @@ function advanceGameHours(char, hours) {
   char.gameHours = (char.gameHours || 0) + hours;
 }
 
+/** Early game: stick to racial wilds until settled in the main city. */
+function wildernessPool(char, data) {
+  const all = data.locations || [];
+  if (char.settledInMainCity) {
+    return all.filter(l => matchesLevel(l, char.level) && !l.race_home);
+  }
+  const racial = all.filter(
+    l => l.race_home === char.raceId && matchesLevel(l, char.level)
+  );
+  if (racial.length) return racial;
+  return all.filter(l => matchesLevel(l, char.level));
+}
+
+function monsterPool(char, data) {
+  const all = data.monsters || [];
+  const leveled = all.filter(m => matchesLevel(m, char.level));
+  if (char.settledInMainCity) {
+    const open = leveled.filter(m => !m.race_home);
+    return open.length ? open : leveled;
+  }
+  const racial = leveled.filter(m => m.race_home === char.raceId);
+  if (racial.length) return racial;
+  return leveled.filter(m => !m.race_home);
+}
+
 function chooseEvent(char, data) {
   const loc = getCurrentLocation(char, data.locations);
   const candidates = data.events.filter(e => matchesLevel(e, char.level));
@@ -54,8 +79,7 @@ function chooseEvent(char, data) {
 }
 
 function chooseMonster(char, data) {
-  const candidates = data.monsters.filter(m => matchesLevel(m, char.level));
-  return pick(candidates);
+  return pick(monsterPool(char, data));
 }
 
 function tryAddLoot(char, itemId, data, flavor) {
@@ -89,7 +113,7 @@ function resolveCombat(char, monster, data) {
       Math.round(monster.stats.attack * 0.7 - char.stats.vitality * 0.25)
     );
     char.hp = Math.max(0, char.hp - damage);
-    text = `You were wounded by the ${monster.name} (−${damage} HP).`;
+    text = `You were wounded by the ${monster.name}.`;
     xpGain = Math.round(2 + char.level * 0.4);
     if (char.hp <= 0) {
       char.hp = 1;
@@ -124,9 +148,8 @@ function resolveEvent(char, event, data) {
     xpGain = Math.round(4 + char.level);
     type = 'loot';
   } else if (outcome.type === 'damage' || outcome.type === 'trap' || outcome.effect === 'minor_damage') {
-    const dmg = 2 + Math.floor(char.level / 3);
-    char.hp = Math.max(1, char.hp - dmg);
-    text += ` You take harm (−${dmg} HP).`;
+    char.hp = Math.max(1, char.hp - (2 + Math.floor(char.level / 3)));
+    text += ' You take harm.';
     type = 'combat';
   } else if (outcome.type === 'lore' || outcome.effect === 'gain_knowledge' || outcome.effect === 'medium_xp') {
     xpGain = Math.round(8 + char.level * 1.4);
@@ -134,7 +157,7 @@ function resolveEvent(char, event, data) {
     type = 'lore';
   } else if (outcome.type === 'xp' || outcome.effect === 'small_xp') {
     xpGain = Math.round(3 + char.level * 0.8);
-    text += ' You gain a little experience.';
+    text += ' You learn a little from the road.';
   } else {
     xpGain = Math.round(2 + char.level * 0.5);
   }
@@ -143,8 +166,8 @@ function resolveEvent(char, event, data) {
 }
 
 function maybeChangeWildernessLocation(char, data) {
-  if (Math.random() > 0.15) return;
-  const candidates = data.locations.filter(l => matchesLevel(l, char.level));
+  if (Math.random() > 0.12) return;
+  const candidates = wildernessPool(char, data);
   const next = pick(candidates);
   if (next && next.id !== char.locationId) {
     char.locationId = next.id;
@@ -167,7 +190,6 @@ function maybeSpawnBoardEvent(char, data) {
   if (!data.boardEvents?.length) return;
   if (!char.activeEvents) char.activeEvents = [];
   if (char.activeEvents.length >= MAX_BOARD_EVENTS) return;
-  // ~12% chance per tick to offer something new
   if (Math.random() > 0.12) return;
 
   const activeIds = new Set(char.activeEvents.map(e => e.templateId));
@@ -195,6 +217,31 @@ function maybeSpawnBoardEvent(char, data) {
   pushLog(char, 'system', `New event available: ${instance.name}.`);
 }
 
+function maybeOfferClassQuest(char, data) {
+  if (char.level < 5) return;
+  if (char.settledInMainCity) return;
+  if (char.classQuestState === 'available' || char.classQuestState === 'done') return;
+  if ((char.activeQuests || []).some(q => q.type === 'class_journey')) return;
+
+  const questDef = data.classQuests?.[char.classId];
+  if (!questDef) return;
+
+  char.classQuestState = 'available';
+  char.activeQuests = char.activeQuests || [];
+  char.activeQuests.push({
+    id: questDef.id,
+    type: 'class_journey',
+    name: questDef.name,
+    description: questDef.description,
+    classId: char.classId
+  });
+  pushLog(
+    char,
+    'system',
+    `A longer road opens: ${questDef.name}. Check your quests when you are ready to leave the place you were born.`
+  );
+}
+
 function wildernessTick(char, data) {
   if (char.hp <= 1 && Math.random() < 0.4) {
     pushLog(char, 'system', 'You are too hurt to risk the wilds. Head home to recover.');
@@ -216,19 +263,51 @@ function wildernessTick(char, data) {
   return xp;
 }
 
+function ensureRacialWilderness(char, data) {
+  const pool = wildernessPool(char, data);
+  if (!pool.length) return;
+  if (!pool.some(l => l.id === char.locationId)) {
+    char.locationId = pool[0].id;
+  }
+}
+
+/** Full health at home → auto back to the wild so the character does not idle indoors. */
+function maybeAutoLeaveHome(char, data) {
+  if (char.zone !== 'home') return false;
+  if (char.hp < char.maxHp) return false;
+
+  ensureRacialWilderness(char, data);
+  const hours = data.config.travel_hours?.wilderness ?? 3;
+  advanceGameHours(char, hours);
+  char.zone = 'wilderness';
+  char.sublocation = null;
+  char.wildernessActive = true;
+  const loc = getCurrentLocation(char, data.locations);
+  pushLog(
+    char,
+    'travel',
+    `Rested and whole, you leave ${char.homeLabel || 'home'} for the wild${loc ? ` — ${loc.name}` : ''}.`
+  );
+  return true;
+}
+
 function homeTick(char, data) {
   if (char.sublocation === 'bedroom' && char.hp < char.maxHp) {
     const heal = Math.max(1, Math.round(char.maxHp * 0.08));
     char.hp = Math.min(char.maxHp, char.hp + heal);
   }
+  if (maybeAutoLeaveHome(char, data)) return 0;
   return data.config.base_xp_per_tick * 0.15;
 }
 
 function villageTick(char, data) {
+  // Racial village is only a place to sleep — treat like home rest if not in main city
+  if (!char.settledInMainCity) {
+    return homeTick(char, data);
+  }
   return data.config.base_xp_per_tick * 0.1;
 }
 
-/** Advance logical ticks (zone-aware). */
 export function advanceTime(char, data, ticks = 1) {
   const hoursPerTick = data.config.game_hours_per_tick ?? 2;
 
@@ -244,13 +323,13 @@ export function advanceTime(char, data, ticks = 1) {
     else if (char.zone === 'village') xp = villageTick(char, data);
 
     if (xp > 0) addXp(char, xp, data.config);
+    maybeOfferClassQuest(char, data);
   }
 
   char.lastTick = Date.now();
   return char;
 }
 
-/** Click an active board event: travel, complete, bonus XP, resume idle zone. */
 export function completeBoardEvent(char, data, instanceId) {
   const idx = (char.activeEvents || []).findIndex(e => e.instanceId === instanceId);
   if (idx < 0) {
@@ -265,31 +344,26 @@ export function completeBoardEvent(char, data, instanceId) {
     return char;
   }
 
-  // Travel to relevant zone / location
   const zone = evt.zone || 'wilderness';
   const hours = data.config.travel_hours?.[zone] ?? 2;
   advanceGameHours(char, hours);
   char.zone = zone;
-  char.sublocation = zone === 'village' ? 'vendor' : zone === 'home' ? 'bedroom' : null;
+  char.sublocation = zone === 'village' ? (char.settledInMainCity ? 'vendor' : 'bedroom') : zone === 'home' ? 'bedroom' : null;
   if (evt.locationHint) char.locationId = evt.locationHint;
 
-  // Resolve a light challenge based on risk
   let bonus = evt.xpReward || 20;
   let note = `You handle: ${evt.name}.`;
   if (evt.risk === 'high' && Math.random() < 0.35) {
     const dmg = 3 + Math.floor(char.level / 2);
     char.hp = Math.max(1, char.hp - dmg);
-    note += ` It costs you (−${dmg} HP).`;
+    note += ' It costs you.';
     bonus = Math.round(bonus * 0.75);
-  } else if (evt.risk === 'low') {
-    bonus = Math.round(bonus * 1.05);
   }
 
   char.activeEvents.splice(idx, 1);
   addXp(char, bonus, data.config);
-  pushLog(char, 'discovery', `${note} (+${bonus} XP).`);
+  pushLog(char, 'discovery', note);
 
-  // Auto-resume idle in wilderness after event
   if (char.zone !== 'wilderness') {
     const back = data.config.travel_hours?.wilderness ?? 3;
     advanceGameHours(char, back);
@@ -302,8 +376,63 @@ export function completeBoardEvent(char, data, instanceId) {
   return char;
 }
 
+/** Accept the level-5 class journey: gear + move home to Crossroads. */
+export function acceptClassQuest(char, data, questId) {
+  const q = (char.activeQuests || []).find(x => x.id === questId && x.type === 'class_journey');
+  if (!q) {
+    pushLog(char, 'system', 'That quest is not available.');
+    return char;
+  }
+  if (char.settledInMainCity) {
+    pushLog(char, 'system', 'You already made Crossroads your home.');
+    return char;
+  }
+
+  const gear = data.starterGear?.[char.classId];
+  if (gear?.main_hand) char.equipment.main_hand = { ...gear.main_hand };
+  if (gear?.chest) char.equipment.chest = { ...gear.chest };
+
+  const weaponName = gear?.main_hand?.name || 'a poor weapon';
+  const chestName = gear?.chest?.name || 'poor clothes';
+  pushLog(
+    char,
+    'system',
+    `You take up ${weaponName} and pull on ${chestName}. Neither is proud gear — only enough to be counted as ${char.className}.`
+  );
+
+  const travelHours = 48;
+  advanceGameHours(char, travelHours);
+
+  char.settledInMainCity = true;
+  char.classQuestState = 'done';
+  char.homeLabel = data.mainCity?.home_label || 'your new quarters in Crossroads';
+  char.zone = 'home';
+  char.sublocation = 'bedroom';
+  char.wildernessActive = false;
+  // Open the wider world near the city roads
+  char.locationId = 'loc_old_road_01';
+
+  char.activeQuests = (char.activeQuests || []).filter(x => x.id !== questId);
+
+  const cityName = data.mainCity?.name || 'Crossroads';
+  pushLog(
+    char,
+    'travel',
+    `After a long road, the gates of ${cityName} rise ahead. This is the main city — markets, halls, and strangers. You claim a place to sleep. ${cityName} is your new home.`
+  );
+
+  char.lastTick = Date.now();
+  return char;
+}
+
 export function travelTo(char, data, zone, sublocation = null) {
   if (char.zone === zone && char.sublocation === sublocation) return char;
+
+  // Before main city, "village" is only the racial home
+  if (zone === 'village' && !char.settledInMainCity) {
+    zone = 'home';
+    sublocation = sublocation || 'bedroom';
+  }
 
   const hours = data.config.travel_hours?.[zone] ?? 2;
   advanceGameHours(char, hours);
@@ -311,20 +440,25 @@ export function travelTo(char, data, zone, sublocation = null) {
   char.zone = zone;
   char.sublocation = sublocation;
 
+  if (zone === 'wilderness') {
+    ensureRacialWilderness(char, data);
+    char.wildernessActive = true;
+  }
+
   const labels = {
     wilderness: 'the wilderness',
-    village: 'the village',
-    home: 'home'
+    village: char.settledInMainCity ? (data.mainCity?.name || 'the city') : (char.racialVillageName || 'the village'),
+    home: char.homeLabel || 'home'
   };
 
   let detail = labels[zone] || zone;
-  if (zone === 'village' && sublocation === 'vendor') detail = 'the village vendor';
-  if (zone === 'village' && sublocation === 'school') detail = 'the village school';
-  if (zone === 'home' && sublocation === 'bedroom') detail = 'your bedroom';
+  if (zone === 'village' && sublocation === 'vendor') detail = 'the vendor stalls';
+  if (zone === 'village' && sublocation === 'school') detail = 'the halls';
+  if (zone === 'home' && sublocation === 'bedroom') detail = char.homeLabel || 'your bedroom';
   if (zone === 'home' && sublocation === 'kitchen') detail = 'your kitchen';
   if (zone === 'home' && sublocation === 'storage') detail = 'your storage';
 
-  pushLog(char, 'travel', `You travel to ${detail} (${hours} hours on the road).`);
+  pushLog(char, 'travel', `You travel to ${detail}.`);
   expireBoardEvents(char);
   char.lastTick = Date.now();
   return char;
@@ -346,15 +480,23 @@ export function restAtHome(char, data) {
   pushLog(
     char,
     'system',
-    `You rest in your bedroom for ${hours} hours and recover ${char.hp - before} HP.`
+    `You rest and recover${char.hp > before ? '' : ' — still worn'}.`
   );
+
+  // If fully healed, do not sit idle at home
+  maybeAutoLeaveHome(char, data);
+
   char.lastTick = Date.now();
   return char;
 }
 
 export function sellAllAtVendor(char, data) {
+  if (!char.settledInMainCity) {
+    pushLog(char, 'system', 'There is no market here — only home.');
+    return char;
+  }
   if (char.zone !== 'village' || char.sublocation !== 'vendor') {
-    pushLog(char, 'system', 'You need to be at the village vendor to sell.');
+    pushLog(char, 'system', 'You need to be at the vendor to sell.');
     return char;
   }
 
@@ -378,11 +520,7 @@ export function sellAllAtVendor(char, data) {
     total += bonus;
   }
 
-  pushLog(
-    char,
-    'loot',
-    `You sell ${count} item${count === 1 ? '' : 's'} for ${total} copper.`
-  );
+  pushLog(char, 'loot', `You sell what you carried. The purse feels heavier.`);
   char.lastTick = Date.now();
   return char;
 }
@@ -399,7 +537,7 @@ export function moveToStorage(char, data) {
   char.storage.push(...char.inventory);
   const n = char.inventory.length;
   char.inventory = [];
-  pushLog(char, 'system', `You store ${n} item${n === 1 ? '' : 's'} at home.`);
+  pushLog(char, 'system', `You store what you carried.`);
   return char;
 }
 
