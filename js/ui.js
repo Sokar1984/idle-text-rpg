@@ -1,21 +1,7 @@
-import {
-  allocateSkill,
-  saveCharacter,
-  getCharacter,
-  randomName,
-  formatCoins,
-  formatGameTime,
-  inventoryCapacity,
-  inventoryUsed
-} from './character.js';
+import { randomName, formatGameTime } from './character.js';
 import { msUntilNextTick } from './engine.js';
-import {
-  renderVillageActions,
-  renderTrainingPanel,
-  renderGearPanel
-} from './panels.js';
+import { renderVillageActions } from './panels.js';
 
-const STATS = ['strength', 'agility', 'intelligence', 'vitality', 'charisma'];
 const AVATAR_STYLES = [
   { id: 'neutral', label: 'Neutral' },
   { id: 'beautiful', label: 'Beautiful' },
@@ -30,18 +16,6 @@ const RACE_COLORS = {
   demon: '#b33a3a',
   dwarf: '#c49a6c'
 };
-
-function formatItem(id) {
-  return id.replace(/_/g, ' ');
-}
-
-function stackedInventory(items) {
-  const counts = new Map();
-  for (const item of items || []) {
-    counts.set(item, (counts.get(item) || 0) + 1);
-  }
-  return [...counts.entries()].sort((a, b) => b[1] - a[1]);
-}
 
 function avatarPath(raceId, gender, style) {
   return `avatars/${raceId}-${gender}-${style}.webp`;
@@ -62,6 +36,7 @@ function hoursLeft(evt, char) {
   return Math.max(0, Math.ceil((evt.expiresAtHour || 0) - (char.gameHours || 0)));
 }
 
+/** Health is bodily — visible. Attribute/skill numbers are not. */
 export function refreshMeters(char, data) {
   const el = document.getElementById('meters');
   if (!el) return;
@@ -70,9 +45,15 @@ export function refreshMeters(char, data) {
   const seconds = Math.max(1, Math.ceil(remainMs / 1000));
   const intervalMs = (data.config.tick_interval_seconds || 60) * 1000;
   const beatPct = Math.max(0, Math.min(100, (1 - remainMs / intervalMs) * 100));
+
+  const wound =
+    hpPct > 75 ? 'Steady' :
+    hpPct > 40 ? 'Worn' :
+    hpPct > 15 ? 'Hurt' : 'Barely standing';
+
   el.innerHTML = `
     <div class="meter">
-      <div class="meter-label"><span>Health</span><span>${char.hp} / ${char.maxHp}</span></div>
+      <div class="meter-label"><span>Condition</span><span>${wound}</span></div>
       <div class="meter-track"><div class="meter-fill hp" style="width:${hpPct}%"></div></div>
     </div>
     <div class="meter">
@@ -109,13 +90,9 @@ export function renderCreation(data, onCreate) {
   function refreshRaceDetail() {
     const race = currentRace();
     if (!race) return;
-    const bonusText = Object.entries(race.bonuses)
-      .filter(([, v]) => v !== 0)
-      .map(([k, v]) => `${v > 0 ? '+' : ''}${v} ${k}`)
-      .join(', ');
+    // Qualitative only — no +stat numbers on the sheet the player sees
     raceDetail.innerHTML = `
       <strong>${race.name}</strong> — ${race.description}<br/>
-      <span class="muted">${bonusText || 'No stat modifiers'}</span><br/>
       <span class="muted">▲ ${race.advantages.join(' · ')}</span><br/>
       <span class="muted">▼ ${race.disadvantages.join(' · ')}</span>
     `;
@@ -201,24 +178,18 @@ export function renderCreation(data, onCreate) {
 
 export function renderGame(char, data, handlers = {}) {
   const loc = data.locations.find(l => l.id === char.locationId);
-  const xpLine = char.level < 10
-    ? `${Math.floor(char.xp)} XP (${Math.ceil(char.xpToNext)} to next)`
-    : 'Max';
   const t = formatGameTime(char, data.config);
-  const coins = formatCoins(char.copper || 0, data.items?.currency);
-  const cap = inventoryCapacity(char, data.config);
-  const used = inventoryUsed(char);
 
   const raceLabel = char.raceName || 'Unknown';
   const genderLabel = char.gender ? char.gender.charAt(0).toUpperCase() + char.gender.slice(1) : '';
 
+  // Identity + place — not a character sheet
   document.getElementById('char-summary').innerHTML = `
     <div class="summary-with-avatar">
       ${renderAvatarPreview(char.raceId || 'human', char.gender || 'male', char.avatarStyle || 'neutral')}
       <div>
         <p class="who"><strong>${char.name}</strong></p>
         <p>${raceLabel} ${char.className}${genderLabel ? ' · ' + genderLabel : ''}</p>
-        <p>Level ${char.level} · ${xpLine}</p>
         <p class="place">Zone: <strong>${char.zone}</strong>${char.sublocation ? ' / ' + char.sublocation : ''}</p>
         ${char.zone === 'wilderness' && loc ? `<p class="place-desc">${loc.name} — ${loc.description}</p>` : ''}
       </div>
@@ -228,7 +199,6 @@ export function renderGame(char, data, handlers = {}) {
   document.getElementById('calendar').innerHTML = `
     Year ${t.year}, day ${t.dayOfYear}, hour ${t.hourOfDay}
     · Age ${t.ageLabel}
-    · Purse ${coins}
   `;
 
   refreshMeters(char, data);
@@ -255,13 +225,13 @@ export function renderGame(char, data, handlers = {}) {
         <button data-sub="bedroom" class="option-chip ${char.sublocation === 'bedroom' ? 'selected' : ''}">Bedroom</button>
         <button data-sub="kitchen" class="option-chip ${char.sublocation === 'kitchen' ? 'selected' : ''}">Kitchen</button>
         <button data-sub="storage" class="option-chip ${char.sublocation === 'storage' ? 'selected' : ''}">Storage</button>
-        <button id="btn-rest" class="secondary compact">Rest & heal</button>
-        ${char.sublocation === 'storage' ? '<button id="btn-store" class="secondary compact">Store pack</button>' : ''}
+        <button id="btn-rest" class="secondary compact">Rest</button>
+        ${char.sublocation === 'storage' ? '<button id="btn-store" class="secondary compact">Stow what you carry</button>' : ''}
       </div>`;
   } else if (char.zone === 'village') {
     actionHtml = renderVillageActions(char, data, handlers);
   } else {
-    actionHtml = `<div class="zone-row"><span class="zone-label">Wilderness</span><span class="hint">Idle events and combat happen here.</span></div>`;
+    actionHtml = `<div class="zone-row"><span class="zone-label">Wilderness</span><span class="hint">The road keeps moving. Events appear when the world offers them.</span></div>`;
   }
   actions.innerHTML = actionHtml;
   actions.querySelectorAll('[data-sub]:not([disabled])').forEach(btn => {
@@ -271,6 +241,7 @@ export function renderGame(char, data, handlers = {}) {
   document.getElementById('btn-sell')?.addEventListener('click', () => handlers.onSell?.());
   document.getElementById('btn-store')?.addEventListener('click', () => handlers.onStore?.());
 
+  // Events / Quests — primary agency
   const eventsEl = document.getElementById('board-events');
   const questsEl = document.getElementById('board-quests');
   const list = char.activeEvents || [];
@@ -286,7 +257,6 @@ export function renderGame(char, data, handlers = {}) {
           <div class="board-card-desc">${evt.description}</div>
           <div class="board-card-meta">
             <span>${evt.risk || 'medium'} risk</span>
-            <span>+${evt.xpReward} XP</span>
             <span>${left}h left</span>
           </div>
         </button>
@@ -300,7 +270,7 @@ export function renderGame(char, data, handlers = {}) {
   const quests = char.activeQuests || [];
   questsEl.innerHTML = quests.length
     ? quests.map(q => `<div class="board-card"><div class="board-card-title">${q.name || 'Quest'}</div></div>`).join('')
-    : `<p class="hint">No quests yet. Completing events may open quests later.</p>`;
+    : `<p class="hint">No quests yet. The road may open longer threads later.</p>`;
 
   document.querySelectorAll('.board-tab').forEach(tab => {
     tab.onclick = () => {
@@ -312,56 +282,9 @@ export function renderGame(char, data, handlers = {}) {
     };
   });
 
-  const statsEl = document.getElementById('stats-panel');
-  statsEl.innerHTML = `
-    <h3>Attributes</h3>
-    ${STATS.map(stat => `
-      <div class="stat-row">
-        <span>${stat.charAt(0).toUpperCase() + stat.slice(1)}</span>
-        <span>${char.stats[stat] ?? '—'}</span>
-      </div>
-    `).join('')}
-  `;
-
-  const skillsEl = document.getElementById('skills-panel');
-  let skillsHtml = `<h3>Attributes to raise</h3>`;
-  if (char.unspentSkillPoints > 0) {
-    skillsHtml += `<p class="hint accent">${char.unspentSkillPoints} point${char.unspentSkillPoints > 1 ? 's' : ''} waiting</p>`;
-    skillsHtml += `<div class="skill-points">`;
-    STATS.forEach(stat => {
-      skillsHtml += `<button data-stat="${stat}"><span>${stat.charAt(0).toUpperCase() + stat.slice(1)}</span><span>+1</span></button>`;
-    });
-    skillsHtml += `</div>`;
-  } else {
-    skillsHtml += `<p class="hint">No unspent attribute points.</p>`;
-  }
-  skillsEl.innerHTML = skillsHtml;
-  skillsEl.querySelectorAll('button[data-stat]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const updated = allocateSkill(getCharacter(), btn.dataset.stat);
-      saveCharacter(updated);
-      renderGame(updated, data, handlers);
-    });
-  });
-
-  renderTrainingPanel(char, data, handlers);
-  renderGearPanel(char, data);
-
-  const packEl = document.getElementById('pack-panel');
-  const stacked = stackedInventory(char.inventory);
-  packEl.innerHTML = `
-    <h3>Pack (${used}/${cap})</h3>
-    <p class="hint">Purse: ${coins}</p>
-    ${stacked.length === 0
-      ? `<p class="hint">Nothing carried yet.</p>`
-      : `<ul class="pack-list">${stacked.map(([item, count]) =>
-          `<li><span>${formatItem(item)}</span><span>×${count}</span></li>`
-        ).join('')}</ul>`}
-    ${char.storage?.length ? `<p class="hint" style="margin-top:0.5rem">Home storage: ${char.storage.length} items</p>` : ''}
-  `;
-
+  // Adventure log — main narrative surface
   const logEl = document.getElementById('log');
-  logEl.innerHTML = char.log.map(entry => {
+  logEl.innerHTML = (char.log || []).map(entry => {
     const time = new Date(entry.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     return `
       <article class="log-entry ${entry.type || ''}">
