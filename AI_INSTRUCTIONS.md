@@ -12,10 +12,13 @@ The world content (locations, monsters, events) is template-driven so that new c
 
 Read these files in order:
 
-1. `README.md`
-2. `CONCEPT.md`
-3. This file (`AI_INSTRUCTIONS.md`)
-4. Anything inside `schemas/`
+1. `CHANGELOG.md` — **what changed recently (required)**
+2. `README.md`
+3. `CONCEPT.md`
+4. This file (`AI_INSTRUCTIONS.md`)
+5. Anything inside `schemas/`
+
+When you finish a meaningful change, **append a dated entry to `CHANGELOG.md`** so the next AI (or session) is not flying blind.
 
 ## Design Constraints (do not violate casually)
 
@@ -23,6 +26,7 @@ Read these files in order:
 - Prefer clarity and simplicity over clever architecture in the early stages.
 - Content must remain data-driven (JSON templates). Avoid hard-coding large amounts of story text in the engine.
 - The game should remain understandable by both humans and other AIs.
+- Character progress lives under a **profile** (`js/profile.js`), not a lone character key. Multi-character is first-class.
 
 ## Preferred way to add content
 
@@ -36,26 +40,28 @@ When asked to expand the world:
 ## Preferred way to extend systems
 
 - Keep the core loop intact: auto-progress → log → player adjustment → continue.
-- New systems (combat resolution, loot, skills, etc.) should read from and write to clear data structures.
-- Document any new data fields you introduce.
+- New systems should read from and write to clear data structures.
+- Document any new data fields you introduce in `CHANGELOG.md`.
+- Navigation must never trap the player (shell: Game · Profile · Graveyard).
 
 ## Communication style when working on this repo
 
 - Be direct and concrete.
-- When you make significant changes, briefly note what you changed and why.
+- When you make significant changes, briefly note what you changed and why **in the changelog**.
 - If you generate a large batch of templates, summarize the ranges and themes you covered.
 
-## Current stage
+## Current stage (see CHANGELOG for detail)
 
-Playable proof-of-concept. Character creation, idle ticks (including offline catch-up), a readable log, skill points, and a pack are in place. Content covers levels 1–10.
+- Playable idle loop, races/classes, zones, board events, training skills, gear slot placeholders
+- **Profile + up to 3 character slots**, active/inactive wilderness flag, graveyard UI
+- Parallel multi-character idle simulation and relationship encounters are planned, not fully wired
 
-Most valuable contributions now:
+Most valuable contributions next:
 
-- More location / monster / event templates
-- Equipment you can actually wear (inventory is collected, not equipped)
-- Occasional pending choices for the player
-- Tuning combat and the 24-hour-to-10 XP curve
+- Parallel `catchUp` for all `wildernessActive` characters
+- Same-account automated wilderness meetings / relationship scores
+- Equipment that can actually be equipped
+- Death → `buryCharacter` wired from combat failure
+- More templates and quest scaffolding
 
 Keep the loop: auto-progress → log → player adjustment → continue.
-
-Future AIs should treat this repository as a living project that is intentionally easy to continue.
