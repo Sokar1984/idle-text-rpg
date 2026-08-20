@@ -7,8 +7,8 @@ const PROFILE_KEY = 'idle-text-rpg-profile';
 const LEGACY_CHAR_KEY = 'idle-text-rpg-character';
 const PROFILE_VERSION = 1;
 
-/** Free tier: one living character. Extra slots later. */
-export const FREE_CHARACTER_SLOTS = 1;
+/** Preview tier: up to three living characters. Monetization later. */
+export const FREE_CHARACTER_SLOTS = 3;
 
 function uid() {
   return `c_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
@@ -30,7 +30,6 @@ function emptyProfile() {
 function ensureCharacterMeta(char) {
   if (!char.id) char.id = uid();
   if (char.wildernessActive == null) {
-    // Wilderness farming flag — independent of zone
     char.wildernessActive = char.zone === 'wilderness';
   }
   if (!char.status) char.status = 'alive';
@@ -44,7 +43,10 @@ export function loadProfile() {
       const p = JSON.parse(raw);
       if (!Array.isArray(p.characters)) p.characters = [];
       if (!Array.isArray(p.graveyard)) p.graveyard = [];
-      if (p.maxSlots == null) p.maxSlots = FREE_CHARACTER_SLOTS;
+      // Keep existing profiles in line with current preview slot count
+      if (p.maxSlots == null || p.maxSlots < FREE_CHARACTER_SLOTS) {
+        p.maxSlots = FREE_CHARACTER_SLOTS;
+      }
       if (p.signedIn == null) p.signedIn = true;
       p.characters = p.characters.map(ensureCharacterMeta);
       return p;
@@ -53,7 +55,6 @@ export function loadProfile() {
     /* fall through */
   }
 
-  // Migrate legacy single-character save
   try {
     const legacy = localStorage.getItem(LEGACY_CHAR_KEY);
     if (legacy) {
@@ -74,7 +75,6 @@ export function loadProfile() {
 export function saveProfile(profile) {
   try {
     localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
-    // Keep legacy key in sync for older code paths
     const active = getActiveCharacter(profile);
     if (active) {
       localStorage.setItem(LEGACY_CHAR_KEY, JSON.stringify(active));
@@ -97,7 +97,6 @@ export function setActiveCharacter(profile, characterId) {
   return profile;
 }
 
-/** Persist the currently edited character blob back into the profile list. */
 export function upsertActiveCharacter(char, profile = loadProfile()) {
   if (!char) return profile;
   ensureCharacterMeta(char);
@@ -140,7 +139,6 @@ export function deleteCharacter(characterId, profile = loadProfile()) {
   return profile;
 }
 
-/** Move a living character into the graveyard (permanent death). */
 export function buryCharacter(characterId, cause = 'Unknown fate', profile = loadProfile()) {
   const idx = profile.characters.findIndex(c => c.id === characterId);
   if (idx < 0) return profile;
