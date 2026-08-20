@@ -2,6 +2,18 @@
 
 Living log for humans and AIs. Newest first. Read this before extending systems.
 
+## 2026-08-20 — Hidden stats (lived experience UI)
+
+**Design:** Attributes, skill %, training points, gear, and pack are **still simulated** but **not shown** on the player UI. Progress is felt through the adventure log, events, and quests — not a character sheet.
+
+- Removed from game screen: attributes panel, attribute spend UI, training panel, gear panel, pack panel
+- Layout focuses on: identity/place, condition, travel, **Events / Quests**, **Adventure log**
+- Condition meter uses qualitative labels (Steady / Worn / Hurt / Barely standing) instead of raw HP numbers in the label
+- Level-up still grants hidden attribute + training points; log line is qualitative only
+- Event cards no longer show “+XP” rewards
+- Race creation detail shows advantages/disadvantages without numeric stat modifiers
+- Backend unchanged: `stats`, `skills`, `unspentSkillPoints`, `trainingPoints`, `equipment`, `inventory` remain on the character save for future event/quest resolution
+
 ## 2026-08-20 — Profile, multi-character, slots=3
 
 - **Profile layer** (`js/profile.js`, `js/profile-ui.js`, `css/profile.css`)
@@ -39,7 +51,7 @@ Living log for humans and AIs. Newest first. Read this before extending systems.
 
 ## Earlier — Core POC
 
-- Single-page idle loop, classes, locations/monsters/events JSON, XP to level 10, offline log, offline catch-up
+- Single-page idle loop, classes, locations/monsters/events JSON, XP to level 10, adventure log, offline catch-up
 
 ---
 
@@ -47,5 +59,6 @@ Living log for humans and AIs. Newest first. Read this before extending systems.
 
 1. Read `CHANGELOG.md` (this file) → `AI_INSTRUCTIONS.md` → `CONCEPT.md`
 2. Do not assume single-character saves; use the profile API
-3. Parallel idle for multiple `wildernessActive` characters and relationship encounters are **designed but not fully simulated yet**
-4. When you ship a meaningful change, **append a dated section here**
+3. **Do not re-expose** attribute/skill/gear/pack panels unless the design explicitly asks — hidden-by-default is intentional
+4. Parallel idle for multiple `wildernessActive` characters and relationship encounters are **designed but not fully simulated yet**
+5. When you ship a meaningful change, **append a dated section here**
