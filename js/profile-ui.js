@@ -21,12 +21,13 @@ export function renderShellNav(state, handlers) {
 
   const profile = loadProfile();
   const hasActive = !!profile.activeCharacterId;
+  const max = profile.maxSlots || FREE_CHARACTER_SLOTS;
 
   el.innerHTML = `
     <div class="shell-row">
       <div class="shell-brand">
         <span class="shell-user">${escapeHtml(profile.displayName || 'Wanderer')}</span>
-        <span class="hint">${profile.characters.length}/${profile.maxSlots || FREE_CHARACTER_SLOTS} slots</span>
+        <span class="hint">${profile.characters.length}/${max} slots</span>
       </div>
       <div class="shell-actions">
         <button type="button" class="secondary compact ${state.screen === 'game' ? 'selected' : ''}" data-nav="game" ${hasActive ? '' : 'disabled'}>
@@ -56,6 +57,7 @@ export function renderProfileScreen(handlers) {
   const active = list.filter(c => c.wildernessActive);
   const inactive = list.filter(c => !c.wildernessActive);
   const canAdd = canAddCharacter(profile);
+  const max = profile.maxSlots || FREE_CHARACTER_SLOTS;
 
   root.innerHTML = `
     <div class="panel">
@@ -73,7 +75,7 @@ export function renderProfileScreen(handlers) {
         <div class="profile-block-head">
           <h3>Characters</h3>
           <button type="button" class="primary compact" data-act="add-character" ${canAdd ? '' : 'disabled'}>
-            ${canAdd ? 'Add character' : 'Slot full (free: 1)'}
+            ${canAdd ? 'Add character' : `Slot full (${max} max)`}
           </button>
         </div>
         <p class="hint">Sorted active first. Active = allowed to idle-farm in the wilderness.</p>
