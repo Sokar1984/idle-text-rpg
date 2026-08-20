@@ -230,6 +230,7 @@ export function addXp(char, amount, config) {
     if (needed == null || char.xp < needed) break;
 
     char.level += 1;
+    // Points still accumulate — hidden from the player UI
     char.unspentSkillPoints += 2;
     char.trainingPoints = (char.trainingPoints || 0) + 1;
     char.maxHp += 6 + Math.floor(char.stats.vitality * 0.5);
@@ -238,7 +239,7 @@ export function addXp(char, amount, config) {
     char.log.unshift({
       time: Date.now(),
       type: 'level',
-      text: `You reached level ${char.level}. +2 attribute points, +1 training point.`
+      text: `Something in you settles differently. The road feels a measure less foreign.`
     });
   }
 
