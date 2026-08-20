@@ -1,6 +1,138 @@
 {
   "monsters": [
     {
+      "id": "mon_race_human_crow",
+      "name": "Field Crow Swarm",
+      "level_range": [1, 3],
+      "tags": ["beast", "vermin"],
+      "race_home": "human",
+      "description": "A noisy knot of crows that dive for eyes and seed sacks.",
+      "stats": { "hp": 10, "attack": 4, "defense": 1, "speed": 7 },
+      "traits": [],
+      "loot_table": ["scraps", "herbs"]
+    },
+    {
+      "id": "mon_race_human_boar",
+      "name": "Fence-Breaker Boar",
+      "level_range": [2, 5],
+      "tags": ["beast"],
+      "race_home": "human",
+      "description": "A farm pest grown bold enough to charge wagons.",
+      "stats": { "hp": 24, "attack": 7, "defense": 4, "speed": 5 },
+      "traits": ["charge"],
+      "loot_table": ["boar_tusk", "tough_meat"]
+    },
+    {
+      "id": "mon_race_orc_hyena",
+      "name": "Scar-Ridge Hyena",
+      "level_range": [1, 3],
+      "tags": ["beast", "pack"],
+      "race_home": "orc",
+      "description": "A laughing scavenger that follows war-trails.",
+      "stats": { "hp": 14, "attack": 6, "defense": 2, "speed": 8 },
+      "traits": ["pack_tactics"],
+      "loot_table": ["scraps", "bone_shard"]
+    },
+    {
+      "id": "mon_race_orc_brute",
+      "name": "Rival Camp Bruiser",
+      "level_range": [3, 5],
+      "tags": ["humanoid"],
+      "race_home": "orc",
+      "description": "An orc from another band looking for a fight, not a talk.",
+      "stats": { "hp": 30, "attack": 9, "defense": 5, "speed": 5 },
+      "traits": [],
+      "loot_table": ["scraps", "crude_dagger", "coins"]
+    },
+    {
+      "id": "mon_race_highelf_sprite",
+      "name": "Spiteful Glade Sprite",
+      "level_range": [1, 3],
+      "tags": ["magical", "forest"],
+      "race_home": "high-elf",
+      "description": "A bright, needle-thin spirit that pinches and misleads.",
+      "stats": { "hp": 9, "attack": 5, "defense": 1, "speed": 10 },
+      "traits": ["elusive"],
+      "loot_table": ["herbs", "rare_herbs"]
+    },
+    {
+      "id": "mon_race_highelf_stag",
+      "name": "Palewood Stag",
+      "level_range": [2, 5],
+      "tags": ["beast", "forest"],
+      "race_home": "high-elf",
+      "description": "Antlers like frost. It does not yield the path.",
+      "stats": { "hp": 26, "attack": 8, "defense": 4, "speed": 7 },
+      "traits": ["charge"],
+      "loot_table": ["tough_meat", "herbs"]
+    },
+    {
+      "id": "mon_race_darkelf_viper",
+      "name": "Umbral Viper",
+      "level_range": [1, 3],
+      "tags": ["beast", "vermin"],
+      "race_home": "dark-elf",
+      "description": "A thin snake the color of wet slate.",
+      "stats": { "hp": 8, "attack": 6, "defense": 1, "speed": 9 },
+      "traits": ["poison"],
+      "loot_table": ["venom_sac", "scraps"]
+    },
+    {
+      "id": "mon_race_darkelf_stalker",
+      "name": "Cutthroat Stalker",
+      "level_range": [3, 5],
+      "tags": ["humanoid", "stealth"],
+      "race_home": "dark-elf",
+      "description": "Another shadow-walker testing your claim on the Cut.",
+      "stats": { "hp": 22, "attack": 9, "defense": 3, "speed": 9 },
+      "traits": ["ambush"],
+      "loot_table": ["crude_dagger", "tattered_cloth", "coins"]
+    },
+    {
+      "id": "mon_race_demon_imp",
+      "name": "Cinder Imp",
+      "level_range": [1, 3],
+      "tags": ["magical", "beast"],
+      "race_home": "demon",
+      "description": "A small, burning pest that hisses when stepped near.",
+      "stats": { "hp": 11, "attack": 5, "defense": 2, "speed": 8 },
+      "traits": ["burn"],
+      "loot_table": ["scraps", "ritual_candle"]
+    },
+    {
+      "id": "mon_race_demon_hound",
+      "name": "Ash Hound",
+      "level_range": [3, 5],
+      "tags": ["beast", "magical"],
+      "race_home": "demon",
+      "description": "A lean hound with eyes like banked coals.",
+      "stats": { "hp": 28, "attack": 10, "defense": 4, "speed": 8 },
+      "traits": ["pack_tactics"],
+      "loot_table": ["wolf_fang", "scraps", "coins"]
+    },
+    {
+      "id": "mon_race_dwarf_mole",
+      "name": "Tunnel Mole",
+      "level_range": [1, 3],
+      "tags": ["beast", "vermin"],
+      "race_home": "dwarf",
+      "description": "A thick-skulled digger that collapses soft footings.",
+      "stats": { "hp": 12, "attack": 4, "defense": 3, "speed": 4 },
+      "traits": [],
+      "loot_table": ["scraps", "stone"]
+    },
+    {
+      "id": "mon_race_dwarf_claim",
+      "name": "Claim Jumper",
+      "level_range": [3, 5],
+      "tags": ["humanoid"],
+      "race_home": "dwarf",
+      "description": "A rough miner who thinks your stretch of slope is free.",
+      "stats": { "hp": 26, "attack": 8, "defense": 6, "speed": 4 },
+      "traits": [],
+      "loot_table": ["scrap", "coins", "stone"]
+    },
+    {
       "id": "mon_rat_01",
       "name": "Giant Rat",
       "level_range": [1, 2],
