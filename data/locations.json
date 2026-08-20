@@ -1,6 +1,72 @@
 {
   "locations": [
     {
+      "id": "loc_race_human_fields",
+      "name": "Border Farmlands",
+      "level_range": [1, 5],
+      "tags": ["wilderness", "rural", "open"],
+      "race_home": "human",
+      "description": "Tilting fence-lines and half-worked fields. Humans farm the soft edges of the wild.",
+      "possible_events": ["travel", "discovery", "wildlife", "social"],
+      "danger": 1,
+      "resources": ["herbs", "game", "scraps"]
+    },
+    {
+      "id": "loc_race_orc_scar",
+      "name": "Ashridge Scar",
+      "level_range": [1, 5],
+      "tags": ["wilderness", "dangerous", "open"],
+      "race_home": "orc",
+      "description": "Burned ridges and bone-marked trails. The ground remembers old raids.",
+      "possible_events": ["ambush", "wildlife", "combat", "discovery"],
+      "danger": 3,
+      "resources": ["scrap", "game", "bone_shard"]
+    },
+    {
+      "id": "loc_race_highelf_glade",
+      "name": "Silverleaf Glade",
+      "level_range": [1, 5],
+      "tags": ["wilderness", "forest", "magical"],
+      "race_home": "high-elf",
+      "description": "Pale trees and quiet light. Paths seem to decide themselves.",
+      "possible_events": ["discovery", "magical", "wildlife", "lore"],
+      "danger": 2,
+      "resources": ["herbs", "rare_herbs", "wood"]
+    },
+    {
+      "id": "loc_race_darkelf_gloom",
+      "name": "Umbral Cut",
+      "level_range": [1, 5],
+      "tags": ["wilderness", "eerie", "forest"],
+      "race_home": "dark-elf",
+      "description": "A sunken track under blackstone shelves. Shadows keep their own counsel.",
+      "possible_events": ["ambush", "discovery", "strange_occurrence", "stealth"],
+      "danger": 3,
+      "resources": ["scrap", "herbs", "tattered_cloth"]
+    },
+    {
+      "id": "loc_race_demon_rift",
+      "name": "Cinder Rift",
+      "level_range": [1, 5],
+      "tags": ["wilderness", "magical", "dangerous"],
+      "race_home": "demon",
+      "description": "Warm cracks in the ground and air that tastes of metal. Nothing here is entirely natural.",
+      "possible_events": ["strange_occurrence", "combat", "magical", "discovery"],
+      "danger": 3,
+      "resources": ["scrap", "coins", "ritual_candle"]
+    },
+    {
+      "id": "loc_race_dwarf_delve",
+      "name": "Stonegate Approaches",
+      "level_range": [1, 5],
+      "tags": ["wilderness", "ruins", "rural"],
+      "race_home": "dwarf",
+      "description": "Quarry slopes and wind-bitten switchbacks leading toward the hold.",
+      "possible_events": ["discovery", "wildlife", "travel", "ambush"],
+      "danger": 2,
+      "resources": ["stone", "scrap", "herbs"]
+    },
+    {
       "id": "loc_meadow_01",
       "name": "Sunlit Meadow",
       "level_range": [1, 3],
