@@ -56,6 +56,22 @@
   gap: 0.55rem;
 }
 
+@media (max-width: 799px) {
+  .board-list {
+    flex-direction: row;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 0.5rem;
+    padding-bottom: 0.15rem;
+  }
+  .board-list > .board-card,
+  .board-list > .hint {
+    flex: 0 0 82%;
+    scroll-snap-align: start;
+  }
+}
+
 .board-card {
   text-align: left;
   width: 100%;

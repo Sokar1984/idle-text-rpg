@@ -2,6 +2,15 @@
 
 Living log for humans and AIs. Newest first. Read this before extending systems.
 
+## 2026-08-21 — Play cockpit (phone)
+
+The game screen no longer scrolls as one long page. **Stage** (who/where, travel, events) and **journal** share the viewport so you see the life happening while you act.
+
+- Phone: log is a persistent pane (~half the screen); stage compact-scrolls above it
+- Events/quests swipe sideways instead of stacking the journal off-screen
+- Header title hides while playing; Profile in the shell, not duplicated
+- Desktop: stage left, journal right
+
 ## 2026-08-21 — Class quest accept UI + auto-journey polish
 
 **Level-5 class quest → main city (end-to-end)**

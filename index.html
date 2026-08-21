@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Idle Text RPG v0.3</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -62,29 +62,31 @@
       <section id="profile" class="hidden"></section>
       <section id="graveyard" class="hidden"></section>
 
-      <section id="game" class="hidden">
-        <div class="panel top-card">
-          <div class="top-bar">
-            <div id="char-summary"></div>
-            <div class="actions">
-              <button id="btn-tick" class="secondary">Walk on</button>
-              <button id="btn-profile" class="ghost">Profile</button>
+      <section id="game" class="hidden play">
+        <div id="play-stage">
+          <div class="panel top-card">
+            <div class="top-bar">
+              <div id="char-summary"></div>
+              <div class="actions">
+                <button id="btn-tick" class="secondary compact">Walk on</button>
+                <button id="btn-profile" class="ghost compact">Profile</button>
+              </div>
             </div>
+            <div id="meters"></div>
+            <div id="calendar" class="calendar-line"></div>
           </div>
-          <div id="meters"></div>
-          <div id="calendar" class="calendar-line"></div>
-        </div>
 
-        <div id="zone-nav" class="zone-nav panel"></div>
-        <div id="zone-actions" class="zone-actions panel"></div>
+          <div id="zone-nav" class="zone-nav panel"></div>
+          <div id="zone-actions" class="zone-actions panel"></div>
 
-        <div class="panel board-panel">
-          <div class="board-tabs">
-            <button type="button" class="board-tab selected" data-tab="events">Events</button>
-            <button type="button" class="board-tab" data-tab="quests">Quests</button>
+          <div class="panel board-panel">
+            <div class="board-tabs">
+              <button type="button" class="board-tab selected" data-tab="events">Events</button>
+              <button type="button" class="board-tab" data-tab="quests">Quests</button>
+            </div>
+            <div id="board-events" class="board-list"></div>
+            <div id="board-quests" class="board-list hidden"></div>
           </div>
-          <div id="board-events" class="board-list"></div>
-          <div id="board-quests" class="board-list hidden"></div>
         </div>
 
         <div id="log-panel" class="sub-panel log-wide">

@@ -154,6 +154,7 @@ function navigate(target) {
   }
 
   screen = target;
+  document.body.dataset.screen = target;
   hideAllMain();
   paintShell();
 
